@@ -23,7 +23,6 @@ const Browser = (props) => {
   const [currentExisting, setCurrentExisting] = useState(false);
   const [currentArchived, setCurrentArchived] = useState(false);
 
-
   const history = useHistory();
   const drawer = React.useRef(null);
   const { enqueue } = useSnackbar();
@@ -83,8 +82,6 @@ const Browser = (props) => {
 
   const addToCollection = async (identifier, title) => {
     const dbItem = await db.collection.get({ id: identifier });
-    console.log("DBITEM");
-    console.log(dbItem);
     if (dbItem === undefined) {
       db.collection.add({
         id: identifier,
@@ -142,15 +139,14 @@ const Browser = (props) => {
     if (e) e.preventDefault();
     let input = document.getElementById('search').value;
     document.getElementById('search').blur();
-
-    history.push("/browse/s/" + input);
+    history.push(`${process.env.PUBLIC_URL}/browse/s/${input}`);
   }
 
   const getLink = (identifier) => {
     if (isSearch != "") {
-      return "/read/" + identifier + "/p/s/" + parentIdentifier;
+      return `${process.env.PUBLIC_URL}/read/${identifier}/p/s/${parentIdentifier}`;
     } else {
-      return "/read/" + identifier + "/p/b/" + parentIdentifier;
+      return `${process.env.PUBLIC_URL}/read/${identifier}/p/b/${parentIdentifier}`;
     }
   }
 

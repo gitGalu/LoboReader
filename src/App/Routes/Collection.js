@@ -35,7 +35,7 @@ const Collection = (props) => {
       return obj.id === identifier
     }));
     // TODO error handling
-    history.push("/read/" + identifier + "/p/c");
+    history.push(`${process.env.PUBLIC_URL}/read/${identifier}/p/c`);
   }
 
   const handleEditClick = (event, item, title) => {

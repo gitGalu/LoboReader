@@ -11,7 +11,7 @@ const ItemMetadataListItem = (props) => {
     switch (mediaType) {
       case 'collection':
         return (
-          <Link to={"/browse/" + props.identifier}>
+          <Link to={`${process.env.PUBLIC_URL}/browse/` + props.identifier}>
             <div className="rowItem">
               {renderRow()}
             </div>

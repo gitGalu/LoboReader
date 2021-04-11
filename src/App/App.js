@@ -20,7 +20,7 @@ const App = (props) => {
     }
 
     return (
-        !isStandalone()
+        isStandalone()
             ?
             <StandaloneWarning />
             :
@@ -72,7 +72,7 @@ const App = (props) => {
                             mode={MODE.radio}
                             initialState={{ selected: 0 }}>
                             <NavLink
-                                to="/browse"
+                                to={`${process.env.PUBLIC_URL}/browse`}
                                 isActive={(match, location) => {
                                     if (match || '/' === location.pathname) {
                                         return true;
@@ -82,7 +82,7 @@ const App = (props) => {
                                 <Button kind={KIND.tertiary}>Browse</Button>
                             </NavLink>
                             <NavLink
-                                to="/collection"
+                                to={`${process.env.PUBLIC_URL}/collection`}
                                 isActive={(match, location) => {
                                     return match;
                                 }}
@@ -95,14 +95,14 @@ const App = (props) => {
 
                 <div className="container">
                     <Switch>
-                        <Route exact path="/" component={Browser} />
-                        <Route exact path="/browse/s/:searchQuery" component={Browser} />
-                        <Route exact path="/browse/:id" component={Browser} />
-                        <Route path="/browse" component={Browser} />
-                        <Route exact path="/collection" component={Collection} />
-                        <Route exact path="/read/:id" component={Reader} />
-                        <Route exact path="/read/:id/p/:prevAction" component={Reader} />
-                        <Route exact path="/read/:id/p/:prevAction/:prevId" component={Reader} />
+                        <Route exact path={`${process.env.PUBLIC_URL}/`} component={Browser} />
+                        <Route exact path={`${process.env.PUBLIC_URL}/browse/s/:searchQuery`} component={Browser} />
+                        <Route exact path={`${process.env.PUBLIC_URL}/browse/:id`} component={Browser} />
+                        <Route path={`${process.env.PUBLIC_URL}/browse`} component={Browser} />
+                        <Route exact path={`${process.env.PUBLIC_URL}/collection`} component={Collection} />
+                        <Route exact path={`${process.env.PUBLIC_URL}/read/:id`} component={Reader} />
+                        <Route exact path={`${process.env.PUBLIC_URL}/read/:id/p/:prevAction`} component={Reader} />
+                        <Route exact path={`${process.env.PUBLIC_URL}/read/:id/p/:prevAction/:prevId`} component={Reader} />
                         <Route default component={Browser} />
                     </Switch>
                 </div>

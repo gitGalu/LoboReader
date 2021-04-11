@@ -27,10 +27,10 @@ const About = (props) => {
             <ModalBody>
                 Build date: {dateTimeStamp}<br /><br />
                 LoboReader is an unofficial reader for the Internet Archive "Magazine Rack".<br/><br/>
-                For changelog, docs & licensing please visit project page on GitHub.
+                For changelog, docs &amp; licensing please visit project page on GitHub.
             </ModalBody>
             <ModalFooter>
-            <Link to={{ pathname: "https://github.com/gitGalu" }} target="_blank"><ModalButton kind="primiary">Visit GitHub</ModalButton></Link>
+            <Link to={{ pathname: "https://github.com/gitGalu/LoboReader" }} target="_blank"><ModalButton kind="primiary">Visit GitHub</ModalButton></Link>
             </ModalFooter>
         </Modal>
     )
