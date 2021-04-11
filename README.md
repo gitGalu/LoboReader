@@ -13,8 +13,17 @@ LoboReader is available as a standalone, client-side, mobile web application (it
 * Android only: cannot submit search queries when using GBoard keyboard w/ autocomplete enabled (as a workaround: try appending a dot after your input query, before tapping Enter)
 * some Alpha transparency issues
 
+# Hosted version
+LoboReader build is hosted on GitHub Pages.
+Please visit [https://gitGalu.github.io/LoboReader/](https://gitGalu.github.io/LoboReader/).
+
 # License
 The source code license is MIT, as described in the LICENSE file.
+
+# Internet Archive
+LoboReader is not affiliated with Internet Archive.
+Please read [Internet Archive's Terms of Use, Privacy Policy, and Copyright Policy](https://archive.org/about/terms.php).
+The Internet Archive "Magazine Rack" is available at [Archive.org](https://archive.org/details/magazine_rack).
 
 # Built using or inspired by:
 * [React](https://github.com/facebook/react)
