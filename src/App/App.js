@@ -20,7 +20,7 @@ const App = (props) => {
     }
 
     return (
-        isStandalone()
+        !isStandalone()
             ?
             <StandaloneWarning />
             :
