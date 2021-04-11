@@ -1,7 +1,6 @@
 import React from 'react';
 import { Helmet } from 'react-helmet';
-import { NavLink } from 'react-router-dom';
-import { Route, Switch, withRouter, Link } from 'react-router-dom';
+import { Route, Switch, withRouter, Link, NavLink } from 'react-router-dom';
 import { HeaderNavigation, ALIGN, StyledNavigationList, StyledNavigationItem } from 'baseui/header-navigation';
 import { Button, KIND } from 'baseui/button';
 import { StatefulButtonGroup, MODE } from 'baseui/button-group';
@@ -19,7 +18,7 @@ const App = (props) => {
     const { isStandalone } = (window.matchMedia('(display-mode: standalone)').matches);
 
     return (
-        isStandalone
+        !isStandalone
             ?
             <StandaloneWarning />
             :
@@ -102,6 +101,7 @@ const App = (props) => {
                         <Route exact path="/read/:id" component={Reader} />
                         <Route exact path="/read/:id/p/:prevAction" component={Reader} />
                         <Route exact path="/read/:id/p/:prevAction/:prevId" component={Reader} />
+                        <Route default component={Browser} />
                     </Switch>
                 </div>
             </SnackbarProvider>
