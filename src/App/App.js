@@ -15,10 +15,12 @@ import './App.css';
 const App = (props) => {
     const [isOpen, setOpen] = React.useState(false);
 
-    const { isStandalone } = (window.matchMedia('(display-mode: standalone)').matches);
+    const isStandalone = () => {
+        return (window.matchMedia('(display-mode: standalone)').matches);
+    }
 
     return (
-        !isStandalone
+        !isStandalone()
             ?
             <StandaloneWarning />
             :
