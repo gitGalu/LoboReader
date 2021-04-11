@@ -112,7 +112,7 @@ li.textContent {
   margin-top: 0px;
 }
 
-.doubleSpace p, li {
+.doubleSpace p, .doubleSpace li {
   padding-bottom: 8px;
   padding-top: 8px;
 }
@@ -122,4 +122,4 @@ li.textContent {
   list-style-position: inside;
   text-indent: -1em;
   padding-left: 1em;
-}
+} 
