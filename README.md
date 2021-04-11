@@ -1,7 +1,5 @@
 # LoboReader
-LoboReader is an unofficial reader for the Internet Archive "Magazine Rack".
-
-It:
+LoboReader is an unofficial reader for the Internet Archive "Magazine Rack". It:
 * automatically remembers magazines we are reading, along with reading progress
 * its viewer component supports standard touch-based gestures (pinch-to-zoom with panning, double-tap-to-zoom, swipe-to-turn-pages etc.)
 
@@ -12,7 +10,7 @@ LoboReader is available as a standalone, client-side, mobile web application (it
 * Google Chrome 87+ on Android
 
 # Known issues
-* Android only: cannot submit search queries when using GBoard keyboard w/ autocomplete enabled (try appending a dot after your input query, before tapping Enter)
+* Android only: cannot submit search queries when using GBoard keyboard w/ autocomplete enabled (as a workaround: try appending a dot after your input query, before tapping Enter)
 * some Alpha transparency issues
 
 # License
