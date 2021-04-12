@@ -93,6 +93,7 @@ const Collection = (props) => {
           </ul>
           <InfiniteScroll
             dataLength={browserItems.length}
+            pullDownToRefresh={false}
             loader={<Centered><StyledSpinnerNext /></Centered>}>
           </InfiniteScroll>
         </div>

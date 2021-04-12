@@ -46,6 +46,7 @@ body {
 
 .page {
   padding-top: 112px;
+  overscroll-behavior: none;
 }
 
 .description {

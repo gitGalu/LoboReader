@@ -240,6 +240,7 @@ const Browser = (props) => {
           </ul>
           <InfiniteScroll
             dataLength={browserItems.length}
+            pullDownToRefresh={false}
             next={fetchData}
             hasMore={hasMore}
             loader={<Centered><StyledSpinnerNext /></Centered>} />
