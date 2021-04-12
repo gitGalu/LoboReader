@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/LoboReader/static/css/main.36c6d80b.chunk.css",
-    "main.js": "/LoboReader/static/js/main.49b10e8b.chunk.js",
-    "main.js.map": "/LoboReader/static/js/main.49b10e8b.chunk.js.map",
+    "main.js": "/LoboReader/static/js/main.b5e02321.chunk.js",
+    "main.js.map": "/LoboReader/static/js/main.b5e02321.chunk.js.map",
     "runtime-main.js": "/LoboReader/static/js/runtime-main.b26d5340.js",
     "runtime-main.js.map": "/LoboReader/static/js/runtime-main.b26d5340.js.map",
     "static/css/2.2f2585e8.chunk.css": "/LoboReader/static/css/2.2f2585e8.chunk.css",
@@ -18,6 +18,6 @@
     "static/css/2.2f2585e8.chunk.css",
     "static/js/2.e822bf62.chunk.js",
     "static/css/main.36c6d80b.chunk.css",
-    "static/js/main.49b10e8b.chunk.js"
+    "static/js/main.b5e02321.chunk.js"
   ]
 }
