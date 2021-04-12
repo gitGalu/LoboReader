@@ -94,19 +94,19 @@ function Reader(props) {
     preload: [1, 2],
     modal: false,
   };
-
+  
   const setOpened = (state) => {
     if (!state) {
       if (prevAction != undefined && prevId != undefined) {
         if (prevAction == "s") {
-          history.push("/browse/s/" + prevId);
+          history.push(`${process.env.PUBLIC_URL}/browse/s/${prevId}`);
         } else {
-          history.push("/browse/" + prevId)
+          history.push(`${process.env.PUBLIC_URL}/browse/${prevId}`);
         }
       } else if (prevAction == "c") {
-        history.push("/collection");
+        history.push(`${process.env.PUBLIC_URL}/collection`);
       } else {
-        history.push("/browse");
+        history.push(`${process.env.PUBLIC_URL}/browse`);
       }
     }
   }
