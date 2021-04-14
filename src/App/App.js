@@ -5,6 +5,7 @@ import { HeaderNavigation, ALIGN, StyledNavigationList, StyledNavigationItem } f
 import { Button, KIND } from 'baseui/button';
 import { StatefulButtonGroup, MODE } from 'baseui/button-group';
 import { SnackbarProvider, PLACEMENT } from 'baseui/snackbar';
+import { Layer } from 'baseui/layer';
 import Browser from './Routes/Browser';
 import Collection from './Routes/Collection';
 import Reader from './Routes/Reader';
@@ -32,66 +33,66 @@ const App = (props) => {
                     <meta name="robots" content="noindex" />
                 </Helmet>
                 <About isOpen={isOpen} onClose={() => setOpen(false)}></About>
-                <div className="anchored-top">
-                    <HeaderNavigation
-                        overrides={{
-                            Root: {
-                                style: {
-                                    height: '48px',
-                                    width: '100%',
-                                }
-                            }
-                        }}>
-                        <StyledNavigationList
-                            $align={ALIGN.left}>
-                            <StyledNavigationItem className="header">
-                                <div>LoboReader</div></StyledNavigationItem>
-                        </StyledNavigationList>
-                        <StyledNavigationList $align={ALIGN.center} />
-                        <StyledNavigationList $align={ALIGN.right}>
-                            <StyledNavigationItem>
-                                <Link to="#">
-                                    <div
-                                        className="header"
-                                        style={{
-                                            float: 'right',
-                                            marginRight: '16px',
-                                            marginTop: '-4px',
-                                            fontSize: '75%'
-                                        }}
-                                        onClick={() => setOpen(s => !s)}>
-                                        About
-                                </div>
-                                </Link>
-                            </StyledNavigationItem>
-                        </StyledNavigationList>
-                    </HeaderNavigation>
-
-                    <div className="menuBar">
-                        <StatefulButtonGroup
-                            mode={MODE.radio}
-                            initialState={{ selected: 0 }}>
-                            <NavLink
-                                to={`${process.env.PUBLIC_URL}/browse`}
-                                isActive={(match, location) => {
-                                    if (match || '/' === location.pathname) {
-                                        return true;
+                <Layer>
+                    <div className="anchored-top">
+                        <HeaderNavigation
+                            overrides={{
+                                Root: {
+                                    style: {
+                                        height: '48px',
                                     }
-                                }}
-                                activeClassName="menuActive">
-                                <Button kind={KIND.tertiary}>Browse</Button>
-                            </NavLink>
-                            <NavLink
-                                to={`${process.env.PUBLIC_URL}/collection`}
-                                isActive={(match, location) => {
-                                    return match;
-                                }}
-                                activeClassName="menuActive">
-                                <Button kind={KIND.tertiary}>Collection</Button>
-                            </NavLink>
-                        </StatefulButtonGroup>
+                                }
+                            }}>
+                            <StyledNavigationList>
+                                <StyledNavigationItem className="header">
+                                    <div>LoboReader</div></StyledNavigationItem>
+                            </StyledNavigationList>
+                            <StyledNavigationList $align={ALIGN.center} />
+                            <StyledNavigationList $align={ALIGN.right}>
+                                <StyledNavigationItem>
+                                    <Link to="#">
+                                        <div
+                                            className="header"
+                                            style={{
+                                                float: 'right',
+                                                marginRight: '16px',
+                                                marginTop: '-4px',
+                                                fontSize: '75%'
+                                            }}
+                                            onClick={() => setOpen(s => !s)}>
+                                            About
+                                </div>
+                                    </Link>
+                                </StyledNavigationItem>
+                            </StyledNavigationList>
+                        </HeaderNavigation>
+                        <div className="menuBar">
+                            <StatefulButtonGroup
+                                mode={MODE.radio}
+                                initialState={{ selected: 0 }}>
+                                <NavLink
+                                    to={`${process.env.PUBLIC_URL}/browse`}
+                                    isActive={(match, location) => {
+                                        if (match || '/' === location.pathname) {
+                                            return true;
+                                        }
+                                    }} ś
+                                    activeClassName="menuActive">
+                                    <Button
+                                        kind={KIND.tertiary}>Browse</Button>
+                                </NavLink>
+                                <NavLink
+                                    to={`${process.env.PUBLIC_URL}/collection`}
+                                    isActive={(match, location) => {
+                                        return match;
+                                    }}
+                                    activeClassName="menuActive">
+                                    <Button kind={KIND.tertiary}>Collection</Button>
+                                </NavLink>
+                            </StatefulButtonGroup>
+                        </div>
                     </div>
-                </div>
+                </Layer>
 
                 <div className="container">
                     <Switch>
