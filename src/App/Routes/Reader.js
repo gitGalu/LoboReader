@@ -50,13 +50,12 @@ function Reader(props) {
     let image_options = '_h1000';
 
     for (var i = 0; i < pageCount; i++) {
-      let numString = i.toString().padStart(4, '0');
+      let minWidthToScale = (bookMetadata.pageWidths[i] > 3000);
+
       items.push({
         src: `https://archive.org/download/${id}/page/leaf${i}${image_options}.jpg`,
-        // w: bookMetadata.pageWidths[i],
-        // h: bookMetadata.pageHeights[i],
-        w: window.innerWidth,
-        h: window.innerHeight,
+        w: minWidthToScale ? (bookMetadata.pageWidths[i] / 2) : bookMetadata.pageWidths[i],
+        h: minWidthToScale ? (bookMetadata.pageHeights[i] / 2) : bookMetadata.pageHeights[i]
       })
     }
     return items;
@@ -88,7 +87,7 @@ function Reader(props) {
     tapToToggleControls: true,
     clickToCloseNonZoomable: false,
     getDoubleTapZoom: function (isMouseClick, item) {
-      return 3;
+      return item.initialZoomLevel * 3;
     },
     history: false,
     preload: [1, 2],
