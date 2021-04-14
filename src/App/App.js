@@ -73,7 +73,7 @@ const App = (props) => {
                                 <NavLink
                                     to={`${process.env.PUBLIC_URL}/browse`}
                                     isActive={(match, location) => {
-                                        if (match || '/' === location.pathname) {
+                                        if (match || ('/LoboReader' === location.pathname || '/LoboReader/' === location.pathname)) {
                                             return true;
                                         }
                                     }} ś
