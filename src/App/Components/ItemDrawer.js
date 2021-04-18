@@ -1,9 +1,5 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
-import { Link, withRouter } from "react-router-dom";
-import { ListItem } from 'baseui/list';
-import { LazyLoadImage } from 'react-lazy-load-image-component'
 import 'react-lazy-load-image-component/src/effects/opacity.css';
-import { ChevronRight } from "baseui/icon";
 import { Button, KIND, SIZE } from 'baseui/button';
 import { H6 } from 'baseui/typography';
 import { Drawer, ANCHOR } from "baseui/drawer";

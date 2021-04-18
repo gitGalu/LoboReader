@@ -16,7 +16,7 @@ import './App.css';
 const App = (props) => {
     const [isOpen, setOpen] = React.useState(false);
 
-    const isStandalone = () => {return true;
+    const isStandalone = () => {
         return (window.matchMedia('(display-mode: standalone)').matches);
     }
 
