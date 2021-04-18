@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from "react-router-dom";
-import InfiniteScroll from "react-infinite-scroll-component";
 import ItemMetadataListItem from '../Components/ItemMetadataListItem'
 import { StyledSpinnerNext } from 'baseui/spinner';
 import { Centered } from '../Components/Centered';
 import db from '../Components/Db';
 import ItemDrawer from '../Components/ItemDrawer';
+import { Masonry } from 'masonic';
 
 const Collection = (props) => {
   const history = useHistory();
@@ -13,6 +13,7 @@ const Collection = (props) => {
 
   const [browserItems, setBrowserItems] = useState([]);
   const [initial, setInitial] = useState(true);
+  const [gridView, setGridView] = useState(false);
 
   useEffect(() => {
     reloadDb();
@@ -45,25 +46,52 @@ const Collection = (props) => {
 
   const archiveItem = (identifier) => {
     db.collection.update({ id: identifier }, { archived: true })
-    .then((result) => {
-      drawer.current.hideDrawer();
-      reloadDb();
-    });
+      .then((result) => {
+        drawer.current.hideDrawer();
+        window.location.reload();
+      });
   }
 
-  const itemMetadataToListItem = (item) => {
-    return <ItemMetadataListItem
-      key={item.id}
-      title={item.title}
-      identifier={item.id}
+  const DataItem = ({ data: { id, title } }) => (
+    <ItemMetadataListItem
+      key={id}
+      title={title}
+      identifier={id}
       mediatype="text"
-      onEditClick={(event) => handleEditClick(event, item.id, item.title)}
-      onSelectItem={(event) => handleItemClick(event, item.id)} />;
+      gridView={gridView}
+      onEditClick={(event) => handleEditClick(event, id, title)}
+      onSelectItem={(event) => handleItemClick(event, id)}
+    />
+  );
+
+  const renderData = () => {
+    return (
+      <div style={{ paddingRight: '16px' }}>
+        <Masonry
+          items={browserItems}
+          columnGutter={gridView ? 16 : 0}
+          columnWidth={80}
+          columnCount={gridView ? undefined : 1}
+          overscanBy={3}
+          render={DataItem}
+        />
+      </div>
+    )
+  }
+
+  const renderEmpty = () => {
+    return (
+    <div id="go">
+      {initial
+        ? <Centered><StyledSpinnerNext /></Centered>
+        : <Centered>Your Collection is empty.</Centered>
+      }
+    </div>
+    );
   }
 
   return (
     <div className="page">
-
       <ItemDrawer
         ref={drawer}
         buttonCount={1}
@@ -87,22 +115,10 @@ const Collection = (props) => {
         </div>
 
       {(browserItems.length > 0 && !initial)
-        ? <div id="go">
-          <ul>
-            {browserItems.map(itemMetadataToListItem)}
-          </ul>
-          <InfiniteScroll
-            dataLength={browserItems.length}
-            pullDownToRefresh={false}
-            loader={<Centered><StyledSpinnerNext /></Centered>}>
-          </InfiniteScroll>
-        </div>
-        : <div id="go">
-          {initial
-            ? <Centered><StyledSpinnerNext /></Centered>
-            : <Centered>Your Collection is empty.</Centered>
-          }
-        </div>
+        ?
+        renderData()
+        :
+        renderEmpty()
       }
     </div>
   )

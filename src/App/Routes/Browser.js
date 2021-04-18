@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { withRouter, useHistory } from "react-router-dom";
-import InfiniteScroll from "react-infinite-scroll-component";
 import { Search as SearchIcon } from 'baseui/icon';
 import Check from 'baseui/icon/check';
 import { SIZE } from "baseui/input";
@@ -12,16 +11,20 @@ import db from '../Components/Db';
 import { Centered } from '../Components/Centered';
 import ItemMetadataListItem from '../Components/ItemMetadataListItem'
 import ItemDrawer from '../Components/ItemDrawer';
+import { Masonry, useInfiniteLoader } from 'masonic';
+import memoize from 'memoize-one';
+
 
 const Browser = (props) => {
   const [browserItems, setBrowserItems] = useState([]);
   const [page, setPage] = useState(1);
   const [initial, setInitial] = useState(true);
-  const [hasMore, setHasMore] = useState(true);
   const [isSearch, setIsSearch] = useState(false);
   const [parentIdentifier, setParentIdentifier] = useState(undefined);
   const [currentExisting, setCurrentExisting] = useState(false);
   const [currentArchived, setCurrentArchived] = useState(false);
+  const [gridView, setGridView] = useState(true);
+  const [totalItems, setTotalItems] = useState(0);
 
   const history = useHistory();
   const drawer = React.useRef(null);
@@ -52,22 +55,13 @@ const Browser = (props) => {
     query();
   }
 
-  const handleItemClick = async (event, item) => {
-    db.collection.get({ id: item.identifier })
+  const handleItemClick = async (event, identifier, title) => {
+    db.collection.get({ id: identifier })
       .then((dbItem) => {
         setCurrentExisting(dbItem !== undefined);
         setCurrentArchived((dbItem !== undefined) ? dbItem.archived : false);
-        drawer.current.showDrawer(item.identifier, item.title);
+        drawer.current.showDrawer(identifier, title);
       });
-  }
-
-  const itemMetadataToListItem = (item) => {
-    return <ItemMetadataListItem
-      key={item.identifier}
-      title={item.title}
-      identifier={item.identifier}
-      mediatype={item.mediatype}
-      onSelectItem={(event) => handleItemClick(event, item)} />;
   }
 
   const startReading = (identifier, title) => {
@@ -110,7 +104,10 @@ const Browser = (props) => {
     if (parentIdentifier == undefined) {
       return;
     }
+    fetchData();
+  }
 
+  const fetchData = () => {
     ia.SearchAPI.get({
       q: isSearch ? '("' + parentIdentifier + '") (collection:("magazine_rack") AND mediatype:(collection OR texts))' : 'collection:("' + parentIdentifier + '" AND mediatype:(collection OR texts))',
       fields: ['identifier', 'title', 'mediatype', 'type', 'metadata'],
@@ -122,17 +119,14 @@ const Browser = (props) => {
       dox.sort((a, b) => (a.title > b.title) ? 1 : ((b.title > a.title) ? -1 : 0))
       dox.sort((a, b) => (a.mediaType > b.mediaType) ? 1 : ((b.mediaType > a.mediaType) ? -1 : 0))
       dox = browserItems.concat(dox);
+      console.log("browserItems: " + browserItems.length + ", dox:" + dox.length);
       setBrowserItems(dox);
-      setHasMore(results.response.numFound > dox.length);
+      setTotalItems(results.response.numFound);
       setInitial(false);
       setPage(page + 1);
     }).catch(err => {
       //TODO error handling
     });
-  }
-
-  const fetchData = () => {
-    query();
   }
 
   const handleSearch = (e) => {
@@ -167,6 +161,55 @@ const Browser = (props) => {
     }
   }
 
+  const DataItem = ({ data: { identifier, title, mediatype } }) => (
+    <ItemMetadataListItem
+      key={identifier}
+      title={title}
+      identifier={identifier}
+      mediatype={mediatype}
+      gridView={gridView}
+      onSelectItem={(event, identifier, title) => handleItemClick(event, identifier, title)}
+    />
+  );
+
+  const fetchMoreItems = memoize((startIndex, stopIndex) => {
+    if (stopIndex > (totalItems - 1)) {
+      stopIndex = totalItems - 1;
+      if (startIndex > (totalItems - 1)) {
+        return;
+      }
+    }
+    fetchData();
+  });
+
+  const maybeLoadMore = useInfiniteLoader(fetchMoreItems);
+
+  const renderData = () => {
+    return (
+      <div>
+        <Masonry
+          items={browserItems}
+          columnGutter={gridView ? 16 : 0}
+          columnWidth={80}
+          columnCount={gridView ? undefined : 1}
+          overscanBy={3}
+          render={DataItem}
+          onRender={maybeLoadMore}
+        />
+      </div>
+    )
+  }
+
+  const renderEmpty = () => {
+    return (
+      <div>
+        {initial
+          ? <Centered><StyledSpinnerNext /></Centered>
+          : <Centered>No results found.</Centered>
+        }
+      </div>
+    );
+  }
 
   return (
     <div className="page">
@@ -198,7 +241,9 @@ const Browser = (props) => {
       </div>
 
       <div style={{ fontSize: '85%', paddingTop: '14px', color: '#cbcbcb' }}>
-        {getHeader()}
+        <span style={{ float: 'left' }}>
+          {getHeader()}
+        </span>
       </div>
 
       <ItemDrawer
@@ -228,31 +273,18 @@ const Browser = (props) => {
               return false;
             default:
               return (currentExisting && !currentArchived);
-            // return true;
           }
         }}
       />
 
-      {(browserItems.length > 0 && !initial)
-        ? <div>
-          <ul>
-            {browserItems.map(itemMetadataToListItem)}
-          </ul>
-          <InfiniteScroll
-            dataLength={browserItems.length}
-            pullDownToRefresh={false}
-            next={fetchData}
-            hasMore={hasMore}
-            loader={<Centered><StyledSpinnerNext /></Centered>} />
-        </div>
-        : <div>
-          {initial
-            ? <Centered><StyledSpinnerNext /></Centered>
-            : <Centered>No results found.</Centered>
-          }
-        </div>
-      }
-
+      <div  style={{ paddingRight: '16px', paddingTop: '32px' }}>
+        {(browserItems.length > 0 && !initial)
+          ?
+          renderData()
+          :
+          renderEmpty()
+        }
+      </div>
     </div>
   );
 }

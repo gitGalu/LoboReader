@@ -16,7 +16,7 @@ import './App.css';
 const App = (props) => {
     const [isOpen, setOpen] = React.useState(false);
 
-    const isStandalone = () => {
+    const isStandalone = () => {return true;
         return (window.matchMedia('(display-mode: standalone)').matches);
     }
 
@@ -76,7 +76,7 @@ const App = (props) => {
                                         if (match || ('/LoboReader' === location.pathname || '/LoboReader/' === location.pathname)) {
                                             return true;
                                         }
-                                    }} ś
+                                    }}
                                     activeClassName="menuActive">
                                     <Button
                                         kind={KIND.tertiary}>Browse</Button>

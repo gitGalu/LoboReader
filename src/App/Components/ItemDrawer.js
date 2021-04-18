@@ -10,7 +10,6 @@ import { Drawer, ANCHOR } from "baseui/drawer";
 
 const ItemDrawer = forwardRef((props, ref) => {
     const [drawerOpen, setDrawerOpen] = useState(false);
-    // const [item, setItem] = useState();
     const [identifier, setIdentifier] = useState("");
     const [title, setTitle] = useState(undefined);
 
@@ -37,10 +36,10 @@ const ItemDrawer = forwardRef((props, ref) => {
             buttons.push(
                 <div>
                     <Button
-                    disabled={(props.buttonDisabled == undefined) ? false : props.buttonDisabled(i, identifier, title)}
-                    onClick={() => props.buttonAction(i, identifier, title)}>
-                    {props.buttonLabel(i, identifier, title)}
-                </Button><br /><br />    
+                        disabled={(props.buttonDisabled == undefined) ? false : props.buttonDisabled(i, identifier, title)}
+                        onClick={() => props.buttonAction(i, identifier, title)}>
+                        {props.buttonLabel(i, identifier, title)}
+                    </Button><br /><br />
                 </div>
             );
         }

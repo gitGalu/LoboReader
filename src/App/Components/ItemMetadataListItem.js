@@ -1,14 +1,15 @@
 import React from "react";
 import { Link, withRouter } from "react-router-dom";
 import { ListItem } from 'baseui/list';
-import { LazyLoadImage } from 'react-lazy-load-image-component'
+import { LazyLoadComponent, LazyLoadImage } from 'react-lazy-load-image-component'
 import 'react-lazy-load-image-component/src/effects/opacity.css';
 import { ChevronRight } from "baseui/icon";
 import { Button, KIND, SIZE } from 'baseui/button';
 
 const ItemMetadataListItem = (props) => {
-  const renderItem = (mediaType) => {
-    switch (mediaType) {
+
+  const renderItem = () => {
+    switch (props.mediatype) {
       case 'collection':
         return (
           <Link to={`${process.env.PUBLIC_URL}/browse/` + props.identifier}>
@@ -42,7 +43,35 @@ const ItemMetadataListItem = (props) => {
     return (<div />);
   }
 
-  const renderRow = (route) => {
+  const renderRow = () => {
+    return (props.gridView ? renderGridElement() : renderListElement());
+  }
+
+  const renderGridElement = () => {
+    return (
+      <div>
+        <LazyLoadComponent>
+          <div >
+            <img
+              className={"gridImg"}
+              effect="opacity"
+              key={props.match.params.searchQuery + props.match.params.id + props.match.params.parentIdentifier}
+              src={"https://archive.org/services/img/" + props.identifier}
+            />
+            {(props.mediatype === "collection") ? <div /> : <div />}
+            <div className={"cardoverlay"} />
+          </div>
+        </LazyLoadComponent>
+
+        {(props.mediatype === "collection") ?
+          <div className="collectionLabel">{props.title}</div>
+          : <div />}
+
+      </div>
+    );
+  }
+
+  const renderListElement = () => {
     return (
       <ListItem
         key="{props.identifier}"
@@ -50,8 +79,9 @@ const ItemMetadataListItem = (props) => {
         overrides={{
           Content: {
             style: {
-              'padding-left': '0px',
-              'margin-left': '0px',
+              'padding-left': '0px !important',
+              'margin-left': '0px !important',
+              'padding-right': '0px !important',
               'width': '100%'
             }
           }
@@ -74,6 +104,7 @@ const ItemMetadataListItem = (props) => {
           src={"https://archive.org/services/img/" + props.identifier}
           width={'64px'}
         />
+
         <div className="description">
           {props.title}
         </div>
@@ -82,7 +113,7 @@ const ItemMetadataListItem = (props) => {
   }
 
   return (
-    renderItem(props.mediatype)
+    renderItem()
   )
 }
 
