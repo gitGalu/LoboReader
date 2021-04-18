@@ -21,7 +21,7 @@ const Collection = (props) => {
 
   const reloadDb = () => {
     db.collection
-      .filter(function (item) {
+      .filter((item) => {
         return item.archived === false;
       })
       .toArray()
@@ -44,21 +44,35 @@ const Collection = (props) => {
     drawer.current.showDrawer(item, title);
   }
 
+  const findIndex = (identifier) => {
+    var ret = -1;
+    browserItems.forEach((element, index) => {
+      if (element.id === identifier) {
+        ret = index;
+      }
+    })
+    return ret;
+  }
+
   const archiveItem = (identifier) => {
-    db.collection.update({ id: identifier }, { archived: true })
+    db.collection.update({ id: identifier }, { archived: true }) 
       .then((result) => {
         drawer.current.hideDrawer();
-        window.location.reload();
+        var index = findIndex(identifier);
+        browserItems[index].disabled = true;
+        setBrowserItems([]);
+        setBrowserItems(browserItems);
       });
   }
 
-  const DataItem = ({ data: { id, title } }) => (
+  const DataItem = ({ data: { id, title, disabled } }) => (
     <ItemMetadataListItem
       key={id}
       title={title}
       identifier={id}
       mediatype="text"
       gridView={gridView}
+      disabled={disabled}
       onEditClick={(event) => handleEditClick(event, id, title)}
       onSelectItem={(event) => handleItemClick(event, id)}
     />

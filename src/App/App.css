@@ -150,3 +150,9 @@ li.textContent {
   font-weight: 500;
   color: white;
 }
+
+.disabledElement {
+  pointer-events:none;
+  filter: grayscale(100%);
+  opacity: 25%;
+}

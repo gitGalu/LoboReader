@@ -24,6 +24,7 @@ const Browser = (props) => {
   const [currentExisting, setCurrentExisting] = useState(false);
   const [currentArchived, setCurrentArchived] = useState(false);
   const [gridView, setGridView] = useState(true);
+  const [pending, setPending] = useState(false);
   const [totalItems, setTotalItems] = useState(0);
 
   const history = useHistory();
@@ -107,7 +108,11 @@ const Browser = (props) => {
     fetchData();
   }
 
-  const fetchData = () => {
+  const fetchData = (identifier, page) => {
+    if (pending) {
+      return;
+    }
+    
     ia.SearchAPI.get({
       q: isSearch ? '("' + parentIdentifier + '") (collection:("magazine_rack") AND mediatype:(collection OR texts))' : 'collection:("' + parentIdentifier + '" AND mediatype:(collection OR texts))',
       fields: ['identifier', 'title', 'mediatype', 'type', 'metadata'],
@@ -119,15 +124,15 @@ const Browser = (props) => {
       dox.sort((a, b) => (a.title > b.title) ? 1 : ((b.title > a.title) ? -1 : 0))
       dox.sort((a, b) => (a.mediaType > b.mediaType) ? 1 : ((b.mediaType > a.mediaType) ? -1 : 0))
       dox = browserItems.concat(dox);
-      console.log("browserItems: " + browserItems.length + ", dox:" + dox.length);
       setBrowserItems(dox);
       setTotalItems(results.response.numFound);
       setInitial(false);
       setPage(page + 1);
+      setPending(false);
     }).catch(err => {
-      //TODO error handling
+      setPending(false);
     });
-  }
+  };
 
   const handleSearch = (e) => {
     if (e) e.preventDefault();
@@ -184,10 +189,15 @@ const Browser = (props) => {
 
   const maybeLoadMore = useInfiniteLoader(fetchMoreItems);
 
+  const getKey = () => {
+    return Date.now();
+  }
+
   const renderData = () => {
     return (
       <div>
         <Masonry
+          key={getKey()}
           items={browserItems}
           columnGutter={gridView ? 16 : 0}
           columnWidth={80}
@@ -277,7 +287,7 @@ const Browser = (props) => {
         }}
       />
 
-      <div  style={{ paddingRight: '16px', paddingTop: '32px' }}>
+      <div style={{ paddingRight: '16px', paddingTop: '32px' }}>
         {(browserItems.length > 0 && !initial)
           ?
           renderData()

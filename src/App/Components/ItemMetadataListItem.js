@@ -7,7 +7,6 @@ import { ChevronRight } from "baseui/icon";
 import { Button, KIND, SIZE } from 'baseui/button';
 
 const ItemMetadataListItem = (props) => {
-
   const renderItem = () => {
     switch (props.mediatype) {
       case 'collection':
@@ -20,7 +19,8 @@ const ItemMetadataListItem = (props) => {
         );
       default:
         return (
-          <div className="rowItem" onClick={(event) => props.onSelectItem(event, props.identifier, props.title)}>
+          <div className={props.disabled ? "disabledElement" : "rowItem"}
+            onClick={(event) => props.onSelectItem(event, props.identifier, props.title)}>
             { renderRow()}
           </div>
         );
@@ -34,6 +34,7 @@ const ItemMetadataListItem = (props) => {
       default:
         if (props.onEditClick) {
           return (<Button onClick={(event) => props.onEditClick(event, props.identifier, props.title)}
+            disabled={props.disabled}
             kind={KIND.secondary}
             size={SIZE.mini}>
             Edit
