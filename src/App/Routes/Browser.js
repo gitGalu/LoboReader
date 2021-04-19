@@ -108,11 +108,11 @@ const Browser = (props) => {
     fetchData();
   }
 
-  const fetchData = (identifier, page) => {
+  const fetchData = () => {
     if (pending) {
       return;
     }
-    
+
     ia.SearchAPI.get({
       q: isSearch ? '("' + parentIdentifier + '") (collection:("magazine_rack") AND mediatype:(collection OR texts))' : 'collection:("' + parentIdentifier + '" AND mediatype:(collection OR texts))',
       fields: ['identifier', 'title', 'mediatype', 'type', 'metadata'],
