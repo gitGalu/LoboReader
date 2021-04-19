@@ -112,11 +112,11 @@ const Browser = (props) => {
     if (pending) {
       return;
     }
-
+    setPending(true);
     ia.SearchAPI.get({
       q: isSearch ? '("' + parentIdentifier + '") (collection:("magazine_rack") AND mediatype:(collection OR texts))' : 'collection:("' + parentIdentifier + '" AND mediatype:(collection OR texts))',
       fields: ['identifier', 'title', 'mediatype', 'type', 'metadata'],
-      rows: 50,
+      rows: 100,
       page: page,
       sort: ['mediatype asc', 'identifier asc']
     }).then(results => {
@@ -177,7 +177,7 @@ const Browser = (props) => {
     />
   );
 
-  const fetchMoreItems = memoize((startIndex, stopIndex) => {
+  const fetchMoreItems = ((startIndex, stopIndex) => {
     if (stopIndex > (totalItems - 1)) {
       stopIndex = totalItems - 1;
       if (startIndex > (totalItems - 1)) {
@@ -202,7 +202,8 @@ const Browser = (props) => {
           columnGutter={gridView ? 16 : 0}
           columnWidth={80}
           columnCount={gridView ? undefined : 1}
-          overscanBy={3}
+          overscanBy={2}
+          itemHeightEstimate={100}
           render={DataItem}
           onRender={maybeLoadMore}
         />

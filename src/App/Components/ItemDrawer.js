@@ -30,12 +30,12 @@ const ItemDrawer = forwardRef((props, ref) => {
         let buttons = [];
         for (let i = 0; i < props.buttonCount; i++) {
             buttons.push(
-                <div>
+                <div style={{'marginBottom':'16px'}}>
                     <Button
                         disabled={(props.buttonDisabled == undefined) ? false : props.buttonDisabled(i, identifier, title)}
                         onClick={() => props.buttonAction(i, identifier, title)}>
                         {props.buttonLabel(i, identifier, title)}
-                    </Button><br /><br />
+                    </Button>
                 </div>
             );
         }
@@ -61,16 +61,23 @@ const ItemDrawer = forwardRef((props, ref) => {
             <div style={{ textAlign: 'center' }}>
                 <H6>{getTitle()}</H6>
                 <br />
+                <div style={{'paddingTop': '4px'}}>
+                <div className="drawerImgOverlay">
                 <img
                     src={getImgUrl()}
                     style={{
                         maxHeight: '175px',
                         borderRadius: '5px',
                         objectFit: 'cover'
+
                     }}
+                    className="drawerImg"
                 />
-                <br /><br />
+                </div>
+                </div>
+                <div style={{'marginTop':'215px'}}>
                 {renderButtons()}
+                </div>
             </div>
         </Drawer>
     )
