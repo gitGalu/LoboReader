@@ -17,8 +17,7 @@ const App = (props) => {
     const [isOpen, setOpen] = React.useState(false);
 
     const isStandalone = () => {
-        // return (window.matchMedia('(display-mode: standalone)').matches);
-        return true;
+        return (window.matchMedia('(display-mode: standalone)').matches);
     }
 
     return (
