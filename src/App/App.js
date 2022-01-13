@@ -17,7 +17,8 @@ const App = (props) => {
     const [isOpen, setOpen] = React.useState(false);
 
     const isStandalone = () => {
-        return (window.matchMedia('(display-mode: standalone)').matches);
+        // return (window.matchMedia('(display-mode: standalone)').matches);
+        return true;
     }
 
     return (
@@ -96,15 +97,16 @@ const App = (props) => {
 
                 <div className="container">
                     <Switch>
-                        <Route exact path={`${process.env.PUBLIC_URL}/`} component={Browser} />
-                        <Route exact path={`${process.env.PUBLIC_URL}/browse/s/:searchQuery`} component={Browser} />
-                        <Route exact path={`${process.env.PUBLIC_URL}/browse/:id`} component={Browser} />
-                        <Route path={`${process.env.PUBLIC_URL}/browse`} component={Browser} />
-                        <Route exact path={`${process.env.PUBLIC_URL}/collection`} component={Collection} />
-                        <Route exact path={`${process.env.PUBLIC_URL}/read/:id`} component={Reader} />
-                        <Route exact path={`${process.env.PUBLIC_URL}/read/:id/p/:prevAction`} component={Reader} />
-                        <Route exact path={`${process.env.PUBLIC_URL}/read/:id/p/:prevAction/:prevId`} component={Reader} />
-                        <Route default component={Browser} />
+                        <Route exact path={`${process.env.PUBLIC_URL}/`} children={<Browser/>} />
+                    
+                        <Route exact path={`${process.env.PUBLIC_URL}/browse/s/:searchQuery`} children={<Browser/>} />
+                        <Route exact path={`${process.env.PUBLIC_URL}/browse/:id`} children={<Browser/>} />
+                        <Route path={`${process.env.PUBLIC_URL}/browse`} children={<Browser/>} />
+                        <Route exact path={`${process.env.PUBLIC_URL}/collection`} children={<Collection/>} />
+                        <Route exact path={`${process.env.PUBLIC_URL}/read/:id`} children={<Reader/>} />
+                        <Route exact path={`${process.env.PUBLIC_URL}/read/:id/p/:prevAction`} children={<Reader/>} />
+                        <Route exact path={`${process.env.PUBLIC_URL}/read/:id/p/:prevAction/:prevId`} children={<Reader/>} />
+                        <Route default children={<Browser/>} />
                     </Switch>
                 </div>
             </SnackbarProvider>
