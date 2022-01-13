@@ -1,23 +1,13 @@
 {
   "files": {
-    "main.css": "/LoboReader/static/css/main.936933e5.chunk.css",
-    "main.js": "/LoboReader/static/js/main.a576f8d0.chunk.js",
-    "main.js.map": "/LoboReader/static/js/main.a576f8d0.chunk.js.map",
-    "runtime-main.js": "/LoboReader/static/js/runtime-main.b26d5340.js",
-    "runtime-main.js.map": "/LoboReader/static/js/runtime-main.b26d5340.js.map",
-    "static/css/2.2f2585e8.chunk.css": "/LoboReader/static/css/2.2f2585e8.chunk.css",
-    "static/js/2.4053227d.chunk.js": "/LoboReader/static/js/2.4053227d.chunk.js",
-    "static/js/2.4053227d.chunk.js.map": "/LoboReader/static/js/2.4053227d.chunk.js.map",
+    "main.css": "/LoboReader/static/css/main.ccd9bade.css",
+    "main.js": "/LoboReader/static/js/main.2c115070.js",
     "index.html": "/LoboReader/index.html",
-    "static/css/2.2f2585e8.chunk.css.map": "/LoboReader/static/css/2.2f2585e8.chunk.css.map",
-    "static/css/main.936933e5.chunk.css.map": "/LoboReader/static/css/main.936933e5.chunk.css.map",
-    "static/js/2.4053227d.chunk.js.LICENSE.txt": "/LoboReader/static/js/2.4053227d.chunk.js.LICENSE.txt"
+    "main.ccd9bade.css.map": "/LoboReader/static/css/main.ccd9bade.css.map",
+    "main.2c115070.js.map": "/LoboReader/static/js/main.2c115070.js.map"
   },
   "entrypoints": [
-    "static/js/runtime-main.b26d5340.js",
-    "static/css/2.2f2585e8.chunk.css",
-    "static/js/2.4053227d.chunk.js",
-    "static/css/main.936933e5.chunk.css",
-    "static/js/main.a576f8d0.chunk.js"
+    "static/css/main.ccd9bade.css",
+    "static/js/main.2c115070.js"
   ]
 }
