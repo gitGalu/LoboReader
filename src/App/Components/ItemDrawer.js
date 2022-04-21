@@ -1,24 +1,30 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import 'react-lazy-load-image-component/src/effects/opacity.css';
-import { Button, KIND, SIZE } from 'baseui/button';
-import { H6 } from 'baseui/typography';
+import { Button, SIZE } from 'baseui/button';
 import { Drawer, ANCHOR } from "baseui/drawer";
 
 const ItemDrawer = forwardRef((props, ref) => {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [identifier, setIdentifier] = useState("");
     const [title, setTitle] = useState(undefined);
+    const [additionalProps, setAdditionalProps] = useState(undefined);
 
     useImperativeHandle(ref, () => {
         return {
             showDrawer: showDrawer,
-            hideDrawer: hideDrawer
+            hideDrawer: hideDrawer,
+            getAdditionalProps: getAdditionalProps
         }
     });
 
-    const showDrawer = (identifier, title) => {
+    const getAdditionalProps = () => {
+        return additionalProps;
+    }
+
+    const showDrawer = (identifier, title, additionalProps) => {
         setIdentifier(identifier);
         setTitle(title);
+        setAdditionalProps(additionalProps);
         setDrawerOpen(true);
     };
 
@@ -56,22 +62,21 @@ const ItemDrawer = forwardRef((props, ref) => {
             autoFocus
             onClose={() => setDrawerOpen(false)}
             anchor={ANCHOR.bottom}
-            size={SIZE.auto}>
-
+            size={SIZE.auto}
+            >
             <div style={{ textAlign: 'center' }}>
-                <H6>{getTitle()}</H6>
+                <div style={{ fontSize: '130%', fontWeight: '550' }}>{ getTitle() }</div>
                 <br />
-                <div style={{'paddingTop': '4px'}}>
-                <div className="drawerImgOverlay">
+                <div style={{ 'paddingTop': '4px' }}>
+                <div className='drawerImgOverlay'>
                 <img
                     src={getImgUrl()}
                     style={{
                         maxHeight: '175px',
                         borderRadius: '5px',
                         objectFit: 'cover'
-
                     }}
-                    className="drawerImg"
+                    className='drawerImg'
                 />
                 </div>
                 </div>

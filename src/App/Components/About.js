@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import preval from 'preval.macro';
 import { CSVLink } from "react-csv";
 import {
@@ -14,11 +14,26 @@ import { StyledLink } from "baseui/link";
 import { Link } from 'react-router-dom';
 import db from '../Components/Db';
 
-const About = (props) => {
+const About = forwardRef((props, ref) => {
+    const [drawerOpen, setDrawerOpen] = useState(false);
     const dateTimeStamp = preval`module.exports = new Date().toLocaleString();`
-
     const csvLinkEl = React.useRef();
     const [data, setData] = useState([]);
+
+    useImperativeHandle(ref, () => {
+        return {
+            showDrawer: showDrawer,
+            hideDrawer: hideDrawer
+        }
+    });
+
+    const showDrawer = (identifier, title) => {
+        setDrawerOpen(true);
+    };
+
+    const hideDrawer = () => {
+        setDrawerOpen(false);
+    };
 
     const headers = [
         { label: "identifier", key: "id" },
@@ -46,8 +61,8 @@ const About = (props) => {
 
     return (
         <Modal
-            isOpen={props.isOpen}
-            onClose={() => props.onClose()}
+            isOpen={drawerOpen}
+            onClose={hideDrawer}
             closeable
             animate
             autoFocus
@@ -66,6 +81,6 @@ const About = (props) => {
             </ModalFooter>
         </Modal>
     )
-}
+});
 
 export default About;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from "react-router-dom";
 import ItemMetadataListItem from '../Components/ItemMetadataListItem'
-import { StyledSpinnerNext } from 'baseui/spinner';
+import { Spinner } from 'baseui/spinner';
 import { Centered } from '../Components/Centered';
 import db from '../Components/Db';
 import ItemDrawer from '../Components/ItemDrawer';
@@ -97,7 +97,7 @@ const Collection = (props) => {
     return (
     <div id="go">
       {initial
-        ? <Centered><StyledSpinnerNext /></Centered>
+        ? <Centered><Spinner /></Centered>
         : <Centered>Your Collection is empty.</Centered>
       }
     </div>

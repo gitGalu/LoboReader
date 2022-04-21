@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { withRouter, useHistory } from 'react-router-dom'
-import { StyledSpinnerNext } from 'baseui/spinner';
+import { Spinner } from 'baseui/spinner';
 import { PhotoSwipe } from 'react-pswp';
 import 'react-pswp/dist/index.css';
 import InternetArchive from '../Components/InternetArchive';
@@ -68,8 +68,9 @@ function Reader(props) {
 
   let options = {
     index: 0,
-    showAnimationDuration: 0,
-    hideAnimationDuration: 0,
+    showAnimationDuration: 100,
+    hideAnimationDuration: 500,
+    showHideOpacity: true,
     fullscreenEl: false,
     allowPanToNext: true,
     bgOpacity: 1,
@@ -95,6 +96,7 @@ function Reader(props) {
   };
   
   const setOpened = (state) => {
+    setTimeout(() => {  
     if (!state) {
       if (prevAction != undefined && prevId != undefined) {
         if (prevAction == "s") {
@@ -108,14 +110,15 @@ function Reader(props) {
         history.push(`${process.env.PUBLIC_URL}/browse`);
       }
     }
-  }
+  }, 250);
+}
 
   return (
     <div>
       {!open
         ?
         (<div>
-          <div className="page"><br /><Centered><StyledSpinnerNext /></Centered></div>
+          <div className="page"><br /><Centered><Spinner /></Centered></div>
         </div>)
         :
         (<PhotoSwipe

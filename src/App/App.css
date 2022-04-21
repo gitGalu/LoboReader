@@ -18,7 +18,8 @@ body {
 }
 
 .listImg {
-  box-shadow: 0 2.8px 2.2px rgba(0, 0, 0, 0.034), 0 6.7px 5.3px rgba(0, 0, 0, 0.048), 0 12.5px 10px rgba(0, 0, 0, 0.06), 0 8px 16px rgba(0, 0, 0, 0.072), 0 10px 16px rgba(0, 0, 0, 0.086), 0 10px 16px rgba(0, 0, 0, 0.12);
+  background-size: cover;
+  box-shadow: 0.625px 0.625px 2.5px rgba(0, 0, 0, 0.3), 1.25px 1.25px 5px rgba(0, 0, 0, 0.3), 5px 6.25px 12.5px rgba(0, 0, 0, 0.4);
   margin-right: 16px;
 }
 
@@ -44,10 +45,6 @@ body {
   left: 0;
   box-shadow: -0.625px -1.25px 2.5px rgba(0, 0, 0, 0.2) inset, -0.625px -0.625px 1.25px rgba(0, 0, 0, 0.2) inset;
   background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.2)), linear-gradient(to right, rgba(0, 0, 0, 0.2) 0, rgba(0, 0, 0, 0) 2.5px, rgba(0, 0, 0, 0.05) 5px, rgba(0, 0, 0, 0) 6.25px);
-}
-
-.e0 {
-  padding-top: 0px !important;
 }
 
 .headerNav {
@@ -119,7 +116,6 @@ li.textContent {
 }
 
 .container {
-  margin-top: 0px;
   margin-left: 16px;
   padding-top: 0px;
   margin-top: 0px;

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Helmet } from 'react-helmet';
-import { Route, Switch, withRouter, Link, NavLink } from 'react-router-dom';
+import { Route, Switch, withRouter, NavLink } from 'react-router-dom';
 import { HeaderNavigation, ALIGN, StyledNavigationList, StyledNavigationItem } from 'baseui/header-navigation';
 import { Button, KIND } from 'baseui/button';
 import { StatefulButtonGroup, MODE } from 'baseui/button-group';
@@ -14,9 +14,10 @@ import StandaloneWarning from './Components/StandaloneWarning';
 import './App.css';
 
 const App = (props) => {
-    const [isOpen, setOpen] = React.useState(false);
+    const drawer = React.useRef(null);
 
     const isStandalone = () => {
+        return true;
         return (window.matchMedia('(display-mode: standalone)').matches);
     }
 
@@ -32,7 +33,7 @@ const App = (props) => {
                     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"></meta>
                     <meta name="robots" content="noindex" />
                 </Helmet>
-                <About isOpen={isOpen} onClose={() => setOpen(false)}></About>
+                <About ref={drawer}></About>
                 <Layer>
                     <div className="anchored-top">
                         <HeaderNavigation
@@ -50,7 +51,7 @@ const App = (props) => {
                             <StyledNavigationList $align={ALIGN.center} />
                             <StyledNavigationList $align={ALIGN.right}>
                                 <StyledNavigationItem>
-                                    <Link to="#">
+                                    <div to="#">
                                         <div
                                             className="header"
                                             style={{
@@ -59,10 +60,13 @@ const App = (props) => {
                                                 marginTop: '-4px',
                                                 fontSize: '75%'
                                             }}
-                                            onClick={() => setOpen(s => !s)}>
+                                            onClick={() => {
+                                                drawer.current.showDrawer();
+                                            }}
+                                            >
                                             About
                                 </div>
-                                    </Link>
+                                    </div>
                                 </StyledNavigationItem>
                             </StyledNavigationList>
                         </HeaderNavigation>
@@ -97,7 +101,6 @@ const App = (props) => {
                 <div className="container">
                     <Switch>
                         <Route exact path={`${process.env.PUBLIC_URL}/`} children={<Browser/>} />
-                    
                         <Route exact path={`${process.env.PUBLIC_URL}/browse/s/:searchQuery`} children={<Browser/>} />
                         <Route exact path={`${process.env.PUBLIC_URL}/browse/:id`} children={<Browser/>} />
                         <Route path={`${process.env.PUBLIC_URL}/browse`} children={<Browser/>} />

@@ -5,15 +5,13 @@ import Check from 'baseui/icon/check';
 import { SIZE } from "baseui/input";
 import { StatefulInput } from 'baseui/input';
 import { useSnackbar } from 'baseui/snackbar';
-import { StyledSpinnerNext } from 'baseui/spinner';
+import { Spinner } from 'baseui/spinner';
 import ia from "../Components/InternetArchive";
 import db from '../Components/Db';
 import { Centered } from '../Components/Centered';
 import ItemMetadataListItem from '../Components/ItemMetadataListItem'
 import ItemDrawer from '../Components/ItemDrawer';
 import { Masonry, useInfiniteLoader } from 'masonic';
-import memoize from 'memoize-one';
-
 
 const Browser = (props) => {
   const [browserItems, setBrowserItems] = useState([]);
@@ -21,14 +19,11 @@ const Browser = (props) => {
   const [initial, setInitial] = useState(true);
   const [isSearch, setIsSearch] = useState(false);
   const [parentIdentifier, setParentIdentifier] = useState(undefined);
-  const [currentExisting, setCurrentExisting] = useState(false);
-  const [currentArchived, setCurrentArchived] = useState(false);
   const [gridView, setGridView] = useState(true);
   const [pending, setPending] = useState(false);
   const [totalItems, setTotalItems] = useState(0);
-
+  const drawer = React.useRef()
   const history = useHistory();
-  const drawer = React.useRef(null);
   const { enqueue } = useSnackbar();
 
   useEffect(() => {
@@ -59,9 +54,9 @@ const Browser = (props) => {
   const handleItemClick = async (event, identifier, title) => {
     db.collection.get({ id: identifier })
       .then((dbItem) => {
-        setCurrentExisting(dbItem !== undefined);
-        setCurrentArchived((dbItem !== undefined) ? dbItem.archived : false);
-        drawer.current.showDrawer(identifier, title);
+        var existing = dbItem !== undefined;
+        var archived = (dbItem !== undefined) ? dbItem.archived : false;
+        drawer.current.showDrawer(identifier, title, { existing: existing, archived: archived });
       });
   }
 
@@ -95,10 +90,10 @@ const Browser = (props) => {
   }
 
   const showNotification = () => {
-    enqueue({
-      message: 'Item was added.',
-      startEnhancer: ({ size }) => <Check size={size} />
-    })
+    // enqueue({
+    //   message: 'Item was added.',
+    //   startEnhancer: ({ size }) => <Check size={size} />
+    // })
   }
 
   const query = () => {
@@ -215,7 +210,7 @@ const Browser = (props) => {
     return (
       <div>
         {initial
-          ? <Centered><StyledSpinnerNext /></Centered>
+          ? <Centered><Spinner /></Centered>
           : <Centered>No results found.</Centered>
         }
       </div>
@@ -257,37 +252,38 @@ const Browser = (props) => {
         </span>
       </div>
 
-      <ItemDrawer
-        ref={drawer}
-        buttonCount={2}
-        buttonLabel={(index, identifier, title) => {
-          switch (index) {
-            case 0:
-              return currentExisting ? 'Continue reading' : 'Start reading';
-            case 1:
-              return (!currentArchived) ? 'Read later' : 'Unarchive';
-          }
-        }}
-        buttonAction={(index, identifier, title) => {
-          switch (index) {
-            case 0:
-              startReading(identifier, title);
-              break;
-            case 1:
-              readLater(identifier, title);
-              break;
-          }
-        }}
-        buttonDisabled={(index, identifier, title) => {
-          switch (index) {
-            case 0:
-              return false;
-            default:
-              return (currentExisting && !currentArchived);
-          }
-        }}
-      />
-
+      <div>
+        <ItemDrawer
+          ref={drawer}
+          buttonCount={2}
+          buttonLabel={(index, identifier, title) => {
+            switch (index) {
+              case 0:
+                return drawer.current?.getAdditionalProps()?.existing ? 'Continue reading' : 'Start reading';
+              case 1:
+                return (!drawer.current?.getAdditionalProps()?.archived) ? 'Read later' : 'Unarchive';
+            }
+          }}
+          buttonAction={(index, identifier, title) => {
+            switch (index) {
+              case 0:
+                startReading(identifier, title);
+                break;
+              case 1:
+                readLater(identifier, title);
+                break;
+            }
+          }}
+          buttonDisabled={(index, identifier, title) => {
+            switch (index) {
+              case 0:
+                return false;
+              default:
+                return (drawer.current?.getAdditionalProps()?.existing && !drawer.current?.getAdditionalProps()?.archived);
+            }
+          }}
+        />
+      </div>
       <div style={{ paddingRight: '16px', paddingTop: '32px' }}>
         {(browserItems.length > 0 && !initial)
           ?
