@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/LoboReader/static/css/main.ccd9bade.css",
-    "main.js": "/LoboReader/static/js/main.2c115070.js",
+    "main.css": "/LoboReader/static/css/main.0a8e0c8d.css",
+    "main.js": "/LoboReader/static/js/main.b0bb873d.js",
     "index.html": "/LoboReader/index.html",
-    "main.ccd9bade.css.map": "/LoboReader/static/css/main.ccd9bade.css.map",
-    "main.2c115070.js.map": "/LoboReader/static/js/main.2c115070.js.map"
+    "main.0a8e0c8d.css.map": "/LoboReader/static/css/main.0a8e0c8d.css.map",
+    "main.b0bb873d.js.map": "/LoboReader/static/js/main.b0bb873d.js.map"
   },
   "entrypoints": [
-    "static/css/main.ccd9bade.css",
-    "static/js/main.2c115070.js"
+    "static/css/main.0a8e0c8d.css",
+    "static/js/main.b0bb873d.js"
   ]
 }
