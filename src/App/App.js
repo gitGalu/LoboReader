@@ -17,7 +17,6 @@ const App = (props) => {
     const drawer = React.useRef(null);
 
     const isStandalone = () => {
-        return true;
         return (window.matchMedia('(display-mode: standalone)').matches);
     }
 
