@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { withRouter, useHistory } from "react-router-dom";
 import { Search as SearchIcon } from 'baseui/icon';
 import Check from 'baseui/icon/check';
-import { SIZE } from "baseui/input";
-import { StatefulInput } from 'baseui/input';
+import { StatefulInput, SIZE } from 'baseui/input';
 import { useSnackbar } from 'baseui/snackbar';
 import { Spinner } from 'baseui/spinner';
 import ia from "../Components/InternetArchive";
@@ -225,7 +224,6 @@ const Browser = (props) => {
           <StatefulInput
             value={isSearch ? parentIdentifier : ""}
             id="search"
-            type="search"
             placeholder="Search the Internet Archive"
             size={SIZE.compact}
             autoComplete="false"
