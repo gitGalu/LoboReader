@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { withRouter, useHistory } from "react-router-dom";
 import { Search as SearchIcon } from 'baseui/icon';
-import Check from 'baseui/icon/check';
-import { StatefulInput, SIZE } from 'baseui/input';
+import { Input, SIZE } from 'baseui/input';
+
 import { useSnackbar } from 'baseui/snackbar';
 import { Spinner } from 'baseui/spinner';
 import ia from "../Components/InternetArchive";
@@ -23,7 +23,7 @@ const Browser = (props) => {
   const [totalItems, setTotalItems] = useState(0);
   const drawer = React.useRef()
   const history = useHistory();
-  const { enqueue } = useSnackbar();
+  // const { enqueue } = useSnackbar();
 
   useEffect(() => {
     setBrowserItems([]);
@@ -221,8 +221,7 @@ const Browser = (props) => {
       <div style={{ marginTop: '4px', marginRight: '14px' }}>
         <form action="" onSubmit={
           (event) => handleSearch(event)}>
-          <StatefulInput
-            value={isSearch ? parentIdentifier : ""}
+          <Input
             id="search"
             placeholder="Search the Internet Archive"
             size={SIZE.compact}

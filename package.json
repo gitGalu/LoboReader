@@ -16,13 +16,13 @@
     "dexie-react-hooks": "^1.1.1",
     "masonic": "^3.6.4",
     "node-fetch": "^2.0.0",
+    "photoswipe": "^5.2.4",
     "preval.macro": "^5.0.0",
     "react": "^18.0.0",
     "react-csv": "^2.2.2",
     "react-dom": "^16.14.0",
     "react-helmet": "^6.1.0",
     "react-lazy-load-image-component": "^1.5.4",
-    "react-pswp": "^0.0.5",
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "^5.0.1",
@@ -54,5 +54,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "gh-pages": "^3.2.3"
   }
 }

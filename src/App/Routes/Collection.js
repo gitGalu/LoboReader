@@ -55,7 +55,7 @@ const Collection = (props) => {
   }
 
   const archiveItem = (identifier) => {
-    db.collection.update({ id: identifier }, { archived: true }) 
+    db.collection.update({ id: identifier }, { archived: true })
       .then((result) => {
         drawer.current.hideDrawer();
         var index = findIndex(identifier);
@@ -86,7 +86,7 @@ const Collection = (props) => {
           columnGutter={gridView ? 16 : 0}
           columnWidth={80}
           columnCount={gridView ? undefined : 1}
-          overscanBy={3}
+          overscanBy={4}
           render={DataItem}
         />
       </div>
@@ -95,12 +95,12 @@ const Collection = (props) => {
 
   const renderEmpty = () => {
     return (
-    <div id="go">
-      {initial
-        ? <Centered><Spinner /></Centered>
-        : <Centered>Your Collection is empty.</Centered>
-      }
-    </div>
+      <div id="go">
+        {initial
+          ? <Centered><Spinner /></Centered>
+          : <Centered>Your Collection is empty.</Centered>
+        }
+      </div>
     );
   }
 
@@ -126,7 +126,7 @@ const Collection = (props) => {
 
       <div style={{ marginTop: '4px', marginRight: '14px', fontSize: '85%', color: '#cbcbcb' }}>
         Your Collection
-        </div>
+      </div>
 
       {(browserItems.length > 0 && !initial)
         ?
