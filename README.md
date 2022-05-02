@@ -9,10 +9,6 @@ LoboReader is available as a standalone, client-side, mobile web application (it
 * Safari on iPadOS 14+ and iOS 14+
 * Google Chrome 87+ on Android
 
-# Known issues
-* Android only: cannot submit search queries when using GBoard keyboard w/ autocomplete enabled (as a workaround: try appending a dot after your input query, before tapping Enter)
-* some Alpha transparency issues
-
 # Hosted version
 LoboReader build is hosted on GitHub Pages.
 Please visit [https://gitGalu.github.io/LoboReader/](https://gitGalu.github.io/LoboReader/).
