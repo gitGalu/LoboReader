@@ -42,12 +42,10 @@ function Reader(props) {
     let image_options = '_h1500';
 
     for (var i = 0; i < pageCount; i++) {
-      let minWidthToScale = (bookMetadata.pageWidths[i] > 3000);
-
       items.push({
         src: `https://archive.org/download/${id}/page/leaf${i}${image_options}.jpg`,
-        width: minWidthToScale ? (bookMetadata.pageWidths[i] / 2) : bookMetadata.pageWidths[i],
-        height: minWidthToScale ? (bookMetadata.pageHeights[i] / 2) : bookMetadata.pageHeights[i],
+        width: bookMetadata.pageWidths[i],
+        height: bookMetadata.pageHeights[i],
         alt: ''
       })
     }
@@ -71,7 +69,23 @@ function Reader(props) {
       preloaderDelay: 0,
       errorMsg: 'The page cannot be loaded',
       dataSource: pages,
-      index: item.page
+      index: item.page,
+      doubleTapAction: (a, e) => {
+        let clickX = a.x;
+        let pageX = pswp.currSlide.panAreaSize.x;
+        let centerX = pageX / 2;
+        let fix = (clickX - centerX) / 2;
+        clickX = clickX + fix;
+
+        if (pswp.currSlide.currZoomLevel == pswp.currSlide.zoomLevels.initial) {
+          pswp.currSlide.zoomTo(pswp.currSlide.zoomLevels.fit * 2.75, { x: clickX, y: a.y }, 0, true);
+        } else {
+          pswp.currSlide.currentResolution = 0;
+          pswp.currSlide.zoomAndPanToInitial();
+          pswp.currSlide.applyCurrentZoomPan();
+          pswp.currSlide.updateContentSize();
+        }
+      }
     };
 
     let pswp = new PhotoSwipe(options);

@@ -191,3 +191,8 @@ ul {
   list-style: none;
   padding-left: 0;
 }
+
+.pswp__top-bar {
+  background-color: #000000aa;
+  pointer-events: none !important;
+}
