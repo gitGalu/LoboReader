@@ -20,7 +20,7 @@ body {
 .listImg {
   background-size: cover;
   box-shadow: 0.625px 0.625px 2.5px rgba(0, 0, 0, 0.3), 1.25px 1.25px 5px rgba(0, 0, 0, 0.3), 5px 6.25px 12.5px rgba(0, 0, 0, 0.4);
-  margin-right: 16px;
+  margin-left: 8px;
 }
 
 .drawerImgOverlay {
@@ -71,7 +71,7 @@ body {
   width: 1000px;
   white-space: nowrap;
   overflow: hidden;
-  padding-left: 12px;
+  padding-left: 24px;
 }
 
 .header {
@@ -83,7 +83,6 @@ body {
   font-weight: 500;
   padding-top: 8px;
   padding-bottom: 4px;
-  font-weight: 500;
   font-size: 18px;
   margin-top: -4px;
   margin-left: -8px;
