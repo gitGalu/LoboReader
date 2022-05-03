@@ -36,7 +36,7 @@ const ItemDrawer = forwardRef((props, ref) => {
         let buttons = [];
         for (let i = 0; i < props.buttonCount; i++) {
             buttons.push(
-                <div style={{'marginBottom':'16px'}}>
+                <div style={{ 'marginBottom': '16px' }}>
                     <Button
                         disabled={(props.buttonDisabled == undefined) ? false : props.buttonDisabled(i, identifier, title)}
                         onClick={() => props.buttonAction(i, identifier, title)}>
@@ -59,29 +59,27 @@ const ItemDrawer = forwardRef((props, ref) => {
     return (
         <Drawer
             isOpen={drawerOpen}
-            autoFocus
             onClose={() => setDrawerOpen(false)}
             anchor={ANCHOR.bottom}
-            size={SIZE.auto}
-            >
+            size={SIZE.auto}>
             <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '130%', fontWeight: '550' }}>{ getTitle() }</div>
+                <div style={{ fontSize: '130%', fontWeight: '550' }}>{getTitle()}</div>
                 <br />
                 <div style={{ 'paddingTop': '4px' }}>
-                <div className='drawerImgOverlay'>
-                <img
-                    src={getImgUrl()}
-                    style={{
-                        maxHeight: '175px',
-                        borderRadius: '5px',
-                        objectFit: 'cover'
-                    }}
-                    className='drawerImg'
-                />
+                    <div className='drawerImgOverlay'>
+                        <img
+                            src={getImgUrl()}
+                            style={{
+                                maxHeight: '175px',
+                                borderRadius: '5px',
+                                objectFit: 'cover'
+                            }}
+                            className='drawerImg'
+                        />
+                    </div>
                 </div>
-                </div>
-                <div style={{'marginTop':'215px'}}>
-                {renderButtons()}
+                <div style={{ 'marginTop': '215px' }}>
+                    {renderButtons()}
                 </div>
             </div>
         </Drawer>
