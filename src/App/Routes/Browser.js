@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { withRouter, useHistory } from "react-router-dom";
-import { Search as SearchIcon } from 'baseui/icon';
-import { Input, SIZE } from 'baseui/input';
-
 import { useSnackbar } from 'baseui/snackbar';
 import { Spinner } from 'baseui/spinner';
 import ia from "../Components/InternetArchive";
 import db from '../Components/Db';
 import { Centered } from '../Components/Centered';
+import SearchBox from '../Components/SearchBox';
 import ItemMetadataListItem from '../Components/ItemMetadataListItem'
 import ItemDrawer from '../Components/ItemDrawer';
 import { Masonry, useInfiniteLoader } from 'masonic';
+
 
 const Browser = (props) => {
   const [browserItems, setBrowserItems] = useState([]);
@@ -128,9 +127,7 @@ const Browser = (props) => {
     });
   };
 
-  const handleSearch = (e) => {
-    if (e) e.preventDefault();
-    let input = document.getElementById('search').value;
+  const handleSearch = (input) => {
     document.getElementById('search').blur();
     history.push(`${process.env.PUBLIC_URL}/browse/s/${input}`);
   }
@@ -219,28 +216,13 @@ const Browser = (props) => {
   return (
     <div className="page">
       <div style={{ marginTop: '4px', marginRight: '14px' }}>
-        <form action="" onSubmit={
-          (event) => handleSearch(event)}>
-          <Input
-            id="search"
-            placeholder="Search the Internet Archive"
-            size={SIZE.compact}
-            autoComplete="false"
-            overrides={{
-              StartEnhancer: {
-                style: {
-                  marginLeft: '0px',
-                  marginRight: '0px',
-                  paddingLeft: '0px',
-                  paddingRight: '0px',
-                  color: '#888888'
-                }
-              }
-            }}
-            startEnhancer={<SearchIcon size="22px" />}
-          />
-        </form>
-
+        <SearchBox
+          id="search"
+          placeholder="Search the Internet Archive"
+          searchAction={(input) => {
+            handleSearch(input);
+          }}
+        />
       </div>
 
       <div style={{ fontSize: '85%', paddingTop: '14px', color: '#cbcbcb' }}>
