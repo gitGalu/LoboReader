@@ -12,7 +12,6 @@ Please visit [https://gitGalu.github.io/LoboReader/](https://gitGalu.github.io/L
 # Screenshots
 
 ![Screenshot#1](/readme/ss01_scaled.png)
-![Screenshot#2](/readme/ss02_scaled.png)
 ![Screenshot#3](/readme/ss03_scaled.png)
 ![Screenshot#4](/readme/ss04_scaled.png)
 ![Screenshot#5](/readme/ss05_scaled.png)
