@@ -11,10 +11,10 @@ Please visit [https://gitGalu.github.io/LoboReader/](https://gitGalu.github.io/L
 
 # Screenshots
 
-![Screenshot#1](/readme/ss01.png)
-![Screenshot#3](/readme/ss03.png)
-![Screenshot#4](/readme/ss04.png)
-![Screenshot#5](/readme/ss05.png)
+![Screenshot#1](/readme/ss01.png | width=320)
+![Screenshot#3](/readme/ss03.png | width=320)
+![Screenshot#4](/readme/ss04.png | width=320)
+![Screenshot#5](/readme/ss05.png | width=320)
 
 # Requirements:
 * Safari on iPadOS 14+ and iOS 14+
