@@ -5,13 +5,21 @@ LoboReader is an unofficial reader for the Internet Archive "Magazine Rack". It:
 
 LoboReader is available as a standalone, client-side, mobile web application (it needs to be added to your mobile OS "Homescreen"). LoboReader fetches all the data from the Internet Archive directly to your device, and only stores the reading progress information locally (on your device).
 
-# Requirements:
-* Safari on iPadOS 14+ and iOS 14+
-* Google Chrome 87+ on Android
-
 # Hosted version
 LoboReader build is hosted on GitHub Pages.
 Please visit [https://gitGalu.github.io/LoboReader/](https://gitGalu.github.io/LoboReader/).
+
+# Screenshots
+
+[Screenshot#1](/readme/ss01_scaled.png)
+[Screenshot#2](/readme/ss02_scaled.png)
+[Screenshot#3](/readme/ss03_scaled.png)
+[Screenshot#4](/readme/ss04_scaled.png)
+[Screenshot#5](/readme/ss05_scaled.png)
+
+# Requirements:
+* Safari on iPadOS 14+ and iOS 14+
+* Google Chrome 87+ on Android
 
 # License
 The source code license is MIT, as described in the LICENSE file.
