@@ -5,9 +5,11 @@ object-assign
 */
 
 /*!
-  * PhotoSwipe 5.2.4 - https://photoswipe.com
+  * PhotoSwipe 5.2.7 - https://photoswipe.com
   * (c) 2022 Dmytro Semenov
   */
+
+/*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */
 
 /**
  * @license React
