@@ -38,7 +38,6 @@ const Collection = (props) => {
     let item = (browserItems.find(obj => {
       return obj.id === identifier
     }));
-    // TODO error handling
     history.push(`${process.env.PUBLIC_URL}/read/${identifier}/p/c`);
   }
 
@@ -115,7 +114,7 @@ const Collection = (props) => {
         buttonLabel={(index, identifier, title) => {
           switch (index) {
             case 0:
-              return 'Archive (hide item)'
+              return 'Remove item'
           }
         }}
         buttonAction={(index, identifier, title) => {
@@ -135,13 +134,13 @@ const Collection = (props) => {
             kind={KIND.tertiary}
             onClick={() => {
               setGridView(!gridView);
-              localStorage.setItem('collection.gridView',  JSON.stringify(!gridView));
+              localStorage.setItem('collection.gridView', JSON.stringify(!gridView));
             }}
             overrides={{
               Root: {
                 style: ({ $theme }) => ({
-                  backgroundColor:'rgb(246, 246, 246)',
-                  width:'96px'
+                  backgroundColor: 'rgb(246, 246, 246)',
+                  width: '96px'
                 })
               }
             }}

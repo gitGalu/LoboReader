@@ -128,9 +128,9 @@ li.textContent {
 
 .doubleSpace li {
   list-style-type: disc;
-  list-style-position: inside;
-  text-indent: -1em;
-  padding-left: 1em;
+  list-style-position: initial;
+  padding-left: 8px;
+  margin-left: 16px;
 }
 
 .cardoverlay {
@@ -195,4 +195,19 @@ ul {
 .pswp__top-bar {
   background-color: #000000aa;
   pointer-events: none !important;
+}
+
+.masonry-container {
+  width: 100%;
+  height: 100%;
+}
+
+.masonry-item {
+  display: inline-block !important;
+  opacity: 1;
+  transition: all 1s;
+}
+
+.standaloneDismiss {
+  text-decoration: dotted underline;
 }

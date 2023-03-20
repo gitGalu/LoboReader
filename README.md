@@ -17,8 +17,8 @@ Please visit [https://gitGalu.github.io/LoboReader/](https://gitGalu.github.io/L
 ![Screenshot#5](/readme/ss05_scaled.png)
 
 # Requirements:
-* Safari on iPadOS 14+ and iOS 14+
-* Google Chrome 87+ on Android
+* Safari on iPadOS 16+ and iOS 16+
+* Google Chrome 103+ on Android
 
 # License
 The source code license is MIT, as described in the LICENSE file.
@@ -31,8 +31,8 @@ The Internet Archive "Magazine Rack" is available at [Archive.org](https://archi
 # Built using or inspired by:
 * [React](https://github.com/facebook/react)
 * [Base Web React UI Framework](https://github.com/uber/baseweb)
-* [Dexie](https://github.com/dfahlander/Dexie.js/)
+* [InfiniteGrid](https://github.com/naver/egjs-infinitegrid)
 * [PhotoSwipe](https://photoswipe.com)
+* [Dexie](https://github.com/dfahlander/Dexie.js/)
 * [React Lazy Load Image Component](https://github.com/Aljullu/react-lazy-load-image-component)
 * [Internet Archive JavaScript Client](https://github.com/rchrd2/iajs)
-

@@ -15,106 +15,113 @@ import StandaloneWarning from './Components/StandaloneWarning';
 import './App.css';
 
 const App = (props) => {
-    const drawer = React.useRef(null);
+  const [ackPwa, setAckPwa] = React.useState(localStorage.getItem('ack.pwa'));
+  const drawer = React.useRef(null);
 
-    const isStandalone = () => {
-        return (window.matchMedia('(display-mode: standalone)').matches);
-    }
+  const isStandalone = () => {
+    return (window.matchMedia('(display-mode: standalone)').matches) || ackPwa;
+  }
 
-    return (
-        <BaseProvider theme={LightTheme}>
-            {!isStandalone()
-                ?
-                <StandaloneWarning />
-                :
-                <SnackbarProvider placement={PLACEMENT.top}>
-                    <Helmet>
-                        <title>LoboReader</title>
-                        <meta charSet="utf-8" />
-                        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"></meta>
-                        <meta name="robots" content="noindex" />
-                    </Helmet>
-                    <About ref={drawer}></About>
-                    <Layer>
-                        <div className="anchored-top">
-                            <HeaderNavigation
-                                overrides={{
-                                    Root: {
-                                        style: {
-                                            height: '48px',
-                                        }
-                                    }
-                                }}>
-                                <StyledNavigationList>
-                                    <StyledNavigationItem className="header">
-                                        <div>LoboReader</div></StyledNavigationItem>
-                                </StyledNavigationList>
-                                <StyledNavigationList $align={ALIGN.center} />
-                                <StyledNavigationList $align={ALIGN.right}>
-                                    <StyledNavigationItem>
-                                        <div to="#">
-                                            <div
-                                                className="header"
-                                                style={{
-                                                    float: 'right',
-                                                    marginRight: '16px',
-                                                    marginTop: '-4px',
-                                                    fontSize: '75%'
-                                                }}
-                                                onClick={() => {
-                                                    drawer.current.showDrawer();
-                                                }}
-                                            >
-                                                About
-                                            </div>
-                                        </div>
-                                    </StyledNavigationItem>
-                                </StyledNavigationList>
-                            </HeaderNavigation>
-                            <div className="menuBar">
-                                <StatefulButtonGroup
-                                    mode={MODE.radio}
-                                    initialState={{ selected: 0 }}>
-                                    <NavLink
-                                        to={`${process.env.PUBLIC_URL}/browse`}
-                                        isActive={(match, location) => {
-                                            if (match || ('/LoboReader' === location.pathname || '/LoboReader/' === location.pathname)) {
-                                                return true;
-                                            }
-                                        }}
-                                        activeClassName="menuActive">
-                                        <Button
-                                            kind={KIND.tertiary}>Browse</Button>
-                                    </NavLink>
-                                    <NavLink
-                                        to={`${process.env.PUBLIC_URL}/collection`}
-                                        isActive={(match, location) => {
-                                            return match;
-                                        }}
-                                        activeClassName="menuActive">
-                                        <Button kind={KIND.tertiary}>Collection</Button>
-                                    </NavLink>
-                                </StatefulButtonGroup>
-                            </div>
-                        </div>
-                    </Layer>
-                    <div className="container">
-                        <Switch>
-                            <Route exact path={`${process.env.PUBLIC_URL}/`} children={<Browser />} />
-                            <Route exact path={`${process.env.PUBLIC_URL}/browse/s/:searchQuery`} children={<Browser />} />
-                            <Route exact path={`${process.env.PUBLIC_URL}/browse/:id`} children={<Browser />} />
-                            <Route path={`${process.env.PUBLIC_URL}/browse`} children={<Browser />} />
-                            <Route exact path={`${process.env.PUBLIC_URL}/collection`} children={<Collection />} />
-                            <Route exact path={`${process.env.PUBLIC_URL}/read/:id`} children={<Reader />} />
-                            <Route exact path={`${process.env.PUBLIC_URL}/read/:id/p/:prevAction`} children={<Reader />} />
-                            <Route exact path={`${process.env.PUBLIC_URL}/read/:id/p/:prevAction/:prevId`} children={<Reader />} />
-                            <Route default children={<Browser />} />
-                        </Switch>
+  const acknowledgeStandaloneWarning = () => {
+    localStorage.setItem('ack.pwa', true);
+    setAckPwa(true);
+  }
+
+  return (
+    <BaseProvider theme={LightTheme}>
+      {!isStandalone() 
+        ?
+        <StandaloneWarning onDismiss={() => acknowledgeStandaloneWarning()} />
+        :
+        <SnackbarProvider placement={PLACEMENT.top}>
+          <Helmet>
+            <title>LoboReader</title>
+            <meta charSet="utf-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"></meta>
+            <meta name="robots" content="noindex" />
+          </Helmet>
+          <About ref={drawer}></About>
+          <Layer>
+            <div className="anchored-top">
+              <HeaderNavigation
+                overrides={{
+                  Root: {
+                    style: {
+                      height: '48px',
+                    }
+                  }
+                }}>
+                <StyledNavigationList>
+                  <StyledNavigationItem className="header">
+                    LoboReader
+                  </StyledNavigationItem>
+                </StyledNavigationList>
+                <StyledNavigationList $align={ALIGN.center} />
+                <StyledNavigationList $align={ALIGN.right}>
+                  <StyledNavigationItem>
+                    <div to="#">
+                      <div
+                        className="header"
+                        style={{
+                          float: 'right',
+                          marginRight: '16px',
+                          marginTop: '-4px',
+                          fontSize: '75%'
+                        }}
+                        onClick={() => {
+                          drawer.current.showDrawer();
+                        }}
+                      >
+                        About
+                      </div>
                     </div>
-                </SnackbarProvider>
-            }
-        </BaseProvider>
-    );
+                  </StyledNavigationItem>
+                </StyledNavigationList>
+              </HeaderNavigation>
+              <div className="menuBar">
+                <StatefulButtonGroup
+                  mode={MODE.radio}
+                  initialState={{ selected: 0 }}>
+                  <NavLink
+                    to={`${process.env.PUBLIC_URL}/browse`}
+                    isActive={(match, location) => {
+                      if (match || ('/LoboReader' === location.pathname || '/LoboReader/' === location.pathname)) {
+                        return true;
+                      }
+                    }}
+                    activeClassName="menuActive">
+                    <Button
+                      kind={KIND.tertiary}>Browse</Button>
+                  </NavLink>
+                  <NavLink
+                    to={`${process.env.PUBLIC_URL}/collection`}
+                    isActive={(match, location) => {
+                      return match;
+                    }}
+                    activeClassName="menuActive">
+                    <Button kind={KIND.tertiary}>Collection</Button>
+                  </NavLink>
+                </StatefulButtonGroup>
+              </div>
+            </div>
+          </Layer>
+          <div className="container">
+            <Switch>
+              <Route exact path={`${process.env.PUBLIC_URL}/`} children={<Browser />} />
+              <Route exact path={`${process.env.PUBLIC_URL}/browse/s/:searchQuery`} children={<Browser />} />
+              <Route exact path={`${process.env.PUBLIC_URL}/browse/:id`} children={<Browser />} />
+              <Route path={`${process.env.PUBLIC_URL}/browse`} children={<Browser />} />
+              <Route exact path={`${process.env.PUBLIC_URL}/collection`} children={<Collection />} />
+              <Route exact path={`${process.env.PUBLIC_URL}/read/:id`} children={<Reader />} />
+              <Route exact path={`${process.env.PUBLIC_URL}/read/:id/p/:prevAction`} children={<Reader />} />
+              <Route exact path={`${process.env.PUBLIC_URL}/read/:id/p/:prevAction/:prevId`} children={<Reader />} />
+              <Route default children={<Browser />} />
+            </Switch>
+          </div>
+        </SnackbarProvider>
+      }
+    </BaseProvider>
+  );
 }
 
 export default withRouter(App)

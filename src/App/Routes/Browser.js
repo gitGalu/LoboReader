@@ -8,13 +8,13 @@ import { Centered } from '../Components/Centered';
 import SearchBox from '../Components/SearchBox';
 import ItemMetadataListItem from '../Components/ItemMetadataListItem'
 import ItemDrawer from '../Components/ItemDrawer';
-import { Masonry, useInfiniteLoader } from 'masonic';
-
+import { MasonryInfiniteGrid } from "@egjs/react-infinitegrid";
 
 const Browser = (props) => {
   const [browserItems, setBrowserItems] = useState([]);
   const [page, setPage] = useState(1);
   const [initial, setInitial] = useState(true);
+  const [error, setError] = useState(false);
   const [isSearch, setIsSearch] = useState(false);
   const [parentIdentifier, setParentIdentifier] = useState(undefined);
   const [gridView, setGridView] = useState(true);
@@ -27,6 +27,7 @@ const Browser = (props) => {
   useEffect(() => {
     setBrowserItems([]);
     setPage(1);
+    setError(false);
     setInitial(true);
 
     if (props.match.params.searchQuery !== undefined) {
@@ -46,6 +47,7 @@ const Browser = (props) => {
   const reloadQuery = () => {
     setPage(1);
     setInitial(true);
+    setError(false);
     query();
   }
 
@@ -78,7 +80,7 @@ const Browser = (props) => {
         read: false,
         archived: false
       }, identifier)
-        .then(function (id) {
+        .then(function(id) {
           showNotification();
         });
     } else {
@@ -101,6 +103,7 @@ const Browser = (props) => {
     fetchData();
   }
 
+
   const fetchData = () => {
     if (pending) {
       return;
@@ -109,7 +112,7 @@ const Browser = (props) => {
     ia.SearchAPI.get({
       q: isSearch ? '("' + parentIdentifier + '") (collection:("magazine_rack") AND mediatype:(collection OR texts))' : 'collection:("' + parentIdentifier + '" AND mediatype:(collection OR texts))',
       fields: ['identifier', 'title', 'mediatype', 'type', 'metadata'],
-      rows: 100,
+      rows: 10,
       page: page,
       sort: ['mediatype asc', 'identifier asc']
     }).then(results => {
@@ -124,6 +127,7 @@ const Browser = (props) => {
       setPending(false);
     }).catch(err => {
       setPending(false);
+      setError(true);
     });
   };
 
@@ -157,49 +161,46 @@ const Browser = (props) => {
     }
   }
 
-  const DataItem = ({ data: { identifier, title, mediatype } }) => (
-    <ItemMetadataListItem
-      key={identifier}
-      title={title}
-      identifier={identifier}
-      mediatype={mediatype}
-      gridView={gridView}
-      onSelectItem={(event, identifier, title) => handleItemClick(event, identifier, title)}
-    />
-  );
-
-  const fetchMoreItems = ((startIndex, stopIndex) => {
-    if (stopIndex > (totalItems - 1)) {
-      stopIndex = totalItems - 1;
-      if (startIndex > (totalItems - 1)) {
-        return;
-      }
-    }
-    fetchData();
-  });
-
-  const maybeLoadMore = useInfiniteLoader(fetchMoreItems);
-
-  const getKey = () => {
-    return Date.now();
-  }
-
   const renderData = () => {
     return (
-      <div>
-        <Masonry
-          key={getKey()}
-          items={browserItems}
-          columnGutter={gridView ? 16 : 0}
-          columnWidth={80}
-          columnCount={gridView ? undefined : 1}
-          overscanBy={2}
-          itemHeightEstimate={100}
-          render={DataItem}
-          onRender={maybeLoadMore}
-        />
-      </div>
+      <MasonryInfiniteGrid
+        className="masonry-container"
+        gap={10}
+        column={3}
+        align={'stretch'}
+        useResizeObserver={true}
+        observeChildren={true}
+        onRequestAppend={(e) => {
+          if (browserItems.length < totalItems) {
+            fetchData();
+          } 
+        }}
+      >
+        {browserItems.map((item) =>
+          <div className="masonry-item">
+            <ItemMetadataListItem
+              key={item.identifier}
+              title={item.title}
+              identifier={item.identifier}
+              mediatype={item.mediatype}
+              gridView={gridView}
+              onSelectItem={(e, identifier, title) => handleItemClick(e, identifier, title)}
+            />
+          </div>
+        )
+        }
+      </MasonryInfiniteGrid>
     )
+  }
+
+  const renderError = () => {
+    return (
+      <div>
+        {
+          <Centered>Error loading data from the Internet Archive.</Centered>
+        }
+      </div>
+    );
   }
 
   const renderEmpty = () => {
@@ -264,11 +265,13 @@ const Browser = (props) => {
         />
       </div>
       <div style={{ paddingRight: '16px', paddingTop: '32px' }}>
-        {(browserItems.length > 0 && !initial)
-          ?
-          renderData()
-          :
-          renderEmpty()
+        {
+          error ? renderError() :
+            (browserItems.length > 0 && !initial)
+              ?
+              renderData()
+              :
+              renderEmpty()
         }
       </div>
     </div>

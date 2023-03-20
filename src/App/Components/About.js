@@ -71,12 +71,12 @@ const About = forwardRef((props, ref) => {
             <ModalHeader>LoboReader<br />for Internet Archive</ModalHeader>
             <ModalBody>
                 Build date: {dateTimeStamp}<br /><br />
-                LoboReader is an unofficial reader for the Internet Archive "Magazine Rack".<br /><br />
+                LoboReader is an unofficial mobile reader for the Internet Archive "Magazine Rack".<br /><br />
                 <StyledLink animateUnderline onClick={downloadReport}>Click here</StyledLink> to download your reading list.<br /><br />
                 <CSVLink headers={headers} data={data} ref={csvLinkEl} filename="LoboReader-export.csv"></CSVLink>
                 For changelog, docs &amp; licensing please visit project page on GitHub.
             </ModalBody>
-            <ModalFooter>
+            <ModalFooter style={{paddingBottom: '24px'}}>
                 <Link to={{ pathname: "https://github.com/gitGalu/LoboReader" }} target="_blank"><ModalButton kind="primiary">Visit GitHub</ModalButton></Link>
             </ModalFooter>
         </Modal>

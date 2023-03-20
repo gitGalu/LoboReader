@@ -1,7 +1,8 @@
 {
   "short_name": "LoboReader",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "name": "LoboReader for Internet Archive",
+  "background_color": "white",
   "icons": [
     {
       "src": "favicon.ico",

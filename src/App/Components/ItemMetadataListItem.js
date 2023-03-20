@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, withRouter } from "react-router-dom";
 import { ListItem } from 'baseui/list';
-import { LazyLoadComponent, LazyLoadImage } from 'react-lazy-load-image-component'
+import { LazyLoadImage } from 'react-lazy-load-image-component'
 import 'react-lazy-load-image-component/src/effects/opacity.css';
 import { ChevronRight } from "baseui/icon";
 import { Button, KIND, SIZE } from 'baseui/button';
@@ -21,7 +21,7 @@ const ItemMetadataListItem = (props) => {
         return (
           <div className={props.disabled ? "disabledElement" : "rowItem"}
             onClick={(event) => props.onSelectItem(event, props.identifier, props.title)}>
-            { renderRow()}
+            {renderRow()}
           </div>
         );
     }
@@ -50,25 +50,22 @@ const ItemMetadataListItem = (props) => {
 
   const renderGridElement = () => {
     return (
-      <div>
-        <LazyLoadComponent>
-          <div >
-            <img
-              className={"gridImg"}
-              effect="opacity"
-              key={props.match.params.searchQuery + props.match.params.id + props.match.params.parentIdentifier}
-              src={"https://archive.org/services/img/" + props.identifier}
-            />
-            {(props.mediatype === "collection") ? <div /> : <div />}
-            <div className={"cardoverlay"} />
-          </div>
-        </LazyLoadComponent>
-
-        {(props.mediatype === "collection") ?
-          <div className="collectionLabel">{props.title}</div>
-          : <div />}
-
-      </div>
+      <div >
+        <img
+          className={"gridImg"}
+          width={'100%'}
+          effect="opacity"
+          key={props.match.params.searchQuery + props.match.params.id + props.match.params.parentIdentifier}
+          src={"https://archive.org/services/img/" + props.identifier}
+        />
+        {(props.mediatype === "collection") ? <div /> : <div />}
+        <div className={"cardoverlay"} />
+        {
+          (props.mediatype === "collection") ?
+            <div className="collectionLabel">{props.title}</div>
+            : <div />
+        }
+      </div >
     );
   }
 

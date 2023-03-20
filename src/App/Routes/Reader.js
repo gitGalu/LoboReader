@@ -9,6 +9,7 @@ import 'photoswipe/style.css';
 
 function Reader(props) {
   const [open, setOpen] = useState(false);
+  const [error, setError] = useState(false);
   const history = useHistory();
 
   let id = props.match.params.id;
@@ -16,30 +17,34 @@ function Reader(props) {
   let prevId = props.match.params.prevId;
 
   useEffect(() => {
-    InternetArchive.BookManifestAPI.get({ identifier: id }).then(bookMetadata => {
-      db.collection.get({ id: id })
-        .then((item) => {
-          if (item == undefined) {
-            item = {
-              id: bookMetadata.itemId,
-              title: bookMetadata.title,
-              page: 0,
-              read: false,
-              archived: false
+    setError(false);
+    InternetArchive.BookManifestAPI.get({ identifier: id })
+      .then(bookMetadata => {
+        db.collection.get({ id: id })
+          .then((item) => {
+            if (item == undefined) {
+              item = {
+                id: bookMetadata.itemId,
+                title: bookMetadata.title,
+                page: 0,
+                read: false,
+                archived: false
+              }
+              db.collection.put(item, id);
             }
-            db.collection.put(item, id);
-          }
-          let pages = getImageItems(bookMetadata);
-          setOpen(true);
-          initPhotoSwipe(pages, item);
-        });
-    });
+            let pages = getImageItems(bookMetadata);
+            setOpen(true);
+            initPhotoSwipe(pages, item);
+          })
+      }).catch(err => {
+        setError(true);
+      });
   }, []);
 
   const getImageItems = (bookMetadata) => {
     let items = [];
     let pageCount = bookMetadata.numPages;
-    let image_options = '_h1500';
+    let image_options = '_h2000';
 
     for (var i = 0; i < pageCount; i++) {
       items.push({
@@ -125,14 +130,15 @@ function Reader(props) {
   return (
     <div>
       {
-        !open
-          ?
-          (<div>
-            <div className="page"><br /><Centered><Spinner /></Centered></div>
-          </div>)
-          :
-          (<div>
-          </div>)
+        error ? (<div className="page"><Centered>Error loading data from the Internet Archive.</Centered></div>) :
+          !open
+            ?
+            (<div>
+              <div className="page"><br /><Centered><Spinner /></Centered></div>
+            </div>)
+            :
+            (<div>
+            </div>)
       }
     </div>
   )

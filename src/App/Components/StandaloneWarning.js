@@ -5,12 +5,24 @@ import {
     ROLE,
     SIZE
 } from 'baseui/modal';
+import React, {forwardRef} from 'react';
 
 import {
     StyledBody,
-  } from "baseui/card";
+} from "baseui/card";
 
-const StandaloneWarning = (props) => {
+const StandaloneWarning = ((props) => {
+    const [dismissVisible, setDismissVisible] = React.useState(false);
+
+    setTimeout(() => {
+        setDismissVisible(true);
+    }, 5000);
+
+    const handleButtonClick = () => {
+        setDismissVisible(false);
+        props.onDismiss();
+    }
+
     return (
         <Modal
             isOpen={true}
@@ -20,18 +32,20 @@ const StandaloneWarning = (props) => {
             role={ROLE.alertdialog}>
             <ModalHeader>LoboReader<br />for Internet Archive</ModalHeader>
             <ModalBody className="doubleSpace">
-               <StyledBody>
-               <p>LoboReader is an unofficial reader for the Internet Archive "Magazine Rack".</p>
-               <p></p>
-               <p>You have to add it to your Home screen and launch it from the app icon:</p>
-               <ul>
-               <li>When using Safari (iOS and iPadOS), tap the Share button and select "Add to Home Screen".</li>
-               <li>When using Chrome (Android), tap the menu overflow button (three dots) and select "Add to Home screen".</li>
-               </ul>
-               </StyledBody>
+                <StyledBody>
+                    <p>LoboReader is an unofficial mobile reader for the Internet Archive "Magazine Rack".</p>
+                    <p>For best experience, please use it in standalone PWA mode:</p>
+                    <ul>
+                        <li>In Safari (iOS and iPadOS), tap the Share button and scroll to "Add to Home Screen" option.</li>
+                        <li>In Chrome (Android), tap the menu overflow button (three dots in the corner) and select "Add to Home screen".</li>
+                    </ul>
+                    {dismissVisible ?
+                        <p onClick={handleButtonClick} className="standaloneDismiss">Click here only if you have trouble proceeding or if you use unsupported browser.</p>
+                        : <p></p>}
+                </StyledBody>
             </ModalBody>
         </Modal>
     )
-}
+});
 
 export default StandaloneWarning;
