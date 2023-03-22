@@ -211,3 +211,9 @@ ul {
 .standaloneDismiss {
   text-decoration: dotted underline;
 }
+
+.loading {
+  padding-top: 32px;
+  position: absolute;
+  padding-bottom: 32px;
+}

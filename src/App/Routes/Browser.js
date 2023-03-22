@@ -104,11 +104,12 @@ const Browser = (props) => {
   }
 
 
-  const fetchData = () => {
+  const fetchData = (event) => {
     if (pending) {
       return;
     }
     setPending(true);
+    if (event) event.wait();
     ia.SearchAPI.get({
       q: isSearch ? '("' + parentIdentifier + '") (collection:("magazine_rack") AND mediatype:(collection OR texts))' : 'collection:("' + parentIdentifier + '" AND mediatype:(collection OR texts))',
       fields: ['identifier', 'title', 'mediatype', 'type', 'metadata'],
@@ -125,9 +126,11 @@ const Browser = (props) => {
       setInitial(false);
       setPage(page + 1);
       setPending(false);
+      if (event) event.ready();
     }).catch(err => {
       setPending(false);
       setError(true);
+      if (event) event.ready();
     });
   };
 
@@ -170,9 +173,10 @@ const Browser = (props) => {
         align={'stretch'}
         useResizeObserver={true}
         observeChildren={true}
+        loading={<div className="loading"><Spinner /></div>}
         onRequestAppend={(e) => {
           if (browserItems.length < totalItems) {
-            fetchData();
+            fetchData(e);
           } 
         }}
       >
