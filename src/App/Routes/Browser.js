@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { withRouter, useHistory } from "react-router-dom";
 import { useSnackbar } from 'baseui/snackbar';
 import { Spinner } from 'baseui/spinner';
+import { Button, KIND } from 'baseui/button';
+import { TriangleDown } from 'baseui/icon';
+import { Block } from 'baseui/block';
+import { RadioGroup, Radio, ALIGN } from "baseui/radio";
+import { StatefulPopover, PLACEMENT } from "baseui/popover";
 import ia from "../Components/InternetArchive";
 import db from '../Components/Db';
 import { Centered } from '../Components/Centered';
@@ -22,6 +27,12 @@ const Browser = (props) => {
   const [totalItems, setTotalItems] = useState(0);
   const drawer = React.useRef()
   const history = useHistory();
+  const [searchMode, setSearchMode] = useState(
+    JSON.parse(localStorage.getItem('browser.searchMode')) || "1"
+  );
+  const [searchScope, setSearchScope] = useState(
+    JSON.parse(localStorage.getItem('browser.searchScope')) || "1"
+  );
   // const { enqueue } = useSnackbar();
 
   useEffect(() => {
@@ -80,7 +91,7 @@ const Browser = (props) => {
         read: false,
         archived: false
       }, identifier)
-        .then(function(id) {
+        .then(function (id) {
           showNotification();
         });
     } else {
@@ -103,6 +114,24 @@ const Browser = (props) => {
     fetchData();
   }
 
+  const prepareQuery = () => {
+    if (isSearch) {
+      let q = '';
+      if (searchMode == "2") {
+        q += 'title:';
+      }
+      q += '("' + parentIdentifier + '")';
+      if (searchScope == "1") {
+        q += ' AND collection:("magazine_rack") ';
+        q += ' AND mediatype:(collection OR texts)';
+      } else if (searchScope == "2") {
+        q += 'AND -collection:(inlibrary) AND mediatype:(texts)';
+      }
+      return q;
+    } else {
+      return 'collection:("' + parentIdentifier + '" AND mediatype:(collection OR texts))';
+    }
+  }
 
   const fetchData = (event) => {
     if (pending) {
@@ -111,8 +140,7 @@ const Browser = (props) => {
     setPending(true);
     if (event) event.wait();
     ia.SearchAPI.get({
-      q: isSearch ? '("' + parentIdentifier + '") (collection:("magazine_rack") AND mediatype:(collection OR texts))' : 'collection:("' + parentIdentifier + '" AND mediatype:(collection OR texts))',
-      fields: ['identifier', 'title', 'mediatype', 'type', 'metadata'],
+      q: prepareQuery(), fields: ['identifier', 'title', 'mediatype', 'type', 'metadata'],
       rows: 10,
       page: page,
       sort: ['mediatype asc', 'identifier asc']
@@ -136,7 +164,9 @@ const Browser = (props) => {
 
   const handleSearch = (input) => {
     document.getElementById('search').blur();
-    history.push(`${process.env.PUBLIC_URL}/browse/s/${input}`);
+    // history.push(`${process.env.PUBLIC_URL}/browse/s/${input}`);
+    history.push(`${process.env.PUBLIC_URL}/browse/s/${input}/`);
+
   }
 
   const getLink = (identifier) => {
@@ -177,7 +207,7 @@ const Browser = (props) => {
         onRequestAppend={(e) => {
           if (browserItems.length < totalItems) {
             fetchData(e);
-          } 
+          }
         }}
       >
         {browserItems.map((item) =>
@@ -220,22 +250,83 @@ const Browser = (props) => {
 
   return (
     <div className="page">
-      <div style={{ marginTop: '4px', marginRight: '14px' }}>
+      <div style={{ marginTop: '4px', marginRight: '14px', display: 'flex' }}>
         <SearchBox
           id="search"
-          placeholder="Search the Internet Archive"
+          placeholder={(searchScope == "1") ? 'Search the Magazine Rack' : 'Search the Internet Archive'}
           searchAction={(input) => {
             handleSearch(input);
           }}
         />
+        <StatefulPopover
+          showArrow
+          popoverMargin={4}
+          returnFocus
+          autoFocus
+          placement={PLACEMENT.bottom}
+          overrides={{
+            Body: {
+              style: {
+                marginRight: '8px',
+                backgroundColor: '#ffffff88',
+                backdropFilter: 'blur(6px)'
+              }
+            },
+            Inner: {
+              style: {
+                backgroundColor: '#ffffff88'
+              }
+            },
+          }}
+          content={() => (
+            <Block padding={"16px"}>
+              <div style={{ paddingBottom: '4px ' }}>
+                Search mode:
+              </div>
+              <div style={{ paddingBottom: '4px ' }}>
+                <RadioGroup
+                  value={searchMode}
+                  onChange={e => {
+                    setSearchMode(e.currentTarget.value);
+                    localStorage.setItem('browser.searchMode', JSON.stringify(e.currentTarget.value));
+                  }}
+                  name="searchMode"
+                  align={ALIGN.vertical}>
+                  <Radio value="1" description="Default">Search titles and metadata</Radio>
+                  <Radio value="2">Search titles only</Radio>
+                </RadioGroup>
+              </div>
+              <div style={{ paddingBottom: '4px', paddingTop: '12px' }}>
+                Search scope:
+              </div>
+              <div style={{ paddingBottom: '4px ' }}>
+                <RadioGroup
+                  value={searchScope}
+                  onChange={e => {
+                    setSearchScope(e.currentTarget.value);
+                    localStorage.setItem('browser.searchScope', JSON.stringify(e.currentTarget.value));
+                  }}
+                  name="searchScope"
+                  align={ALIGN.vertical}>
+                  <Radio value="1" description="Default">Magazine Rack</Radio>
+                  <Radio value="2">All Internet Archive texts</Radio>
+                </RadioGroup>
+              </div>
+            </Block>
+          )}>
+          <div style={{ marginLeft: '8px' }}>
+            <Button
+              kind={KIND.secondary}>
+              <TriangleDown size={24} />
+            </Button>
+          </div>
+        </StatefulPopover>
       </div>
-
       <div style={{ fontSize: '85%', paddingTop: '14px', color: '#cbcbcb' }}>
         <span style={{ float: 'left' }}>
           {getHeader()}
         </span>
       </div>
-
       <div>
         <ItemDrawer
           ref={drawer}

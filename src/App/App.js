@@ -108,7 +108,7 @@ const App = (props) => {
           <div className="container">
             <Switch>
               <Route exact path={`${process.env.PUBLIC_URL}/`} children={<Browser />} />
-              <Route exact path={`${process.env.PUBLIC_URL}/browse/s/:searchQuery`} children={<Browser />} />
+              <Route exact path={`${process.env.PUBLIC_URL}/browse/s/:searchQuery`} key={Date.now()} children={<Browser />} />
               <Route exact path={`${process.env.PUBLIC_URL}/browse/:id`} children={<Browser />} />
               <Route path={`${process.env.PUBLIC_URL}/browse`} children={<Browser />} />
               <Route exact path={`${process.env.PUBLIC_URL}/collection`} children={<Collection />} />
