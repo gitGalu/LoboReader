@@ -208,7 +208,7 @@ ul {
   transition: all 1s;
 }
 
-.standaloneDismiss {
+.dotted {
   text-decoration: dotted underline;
 }
 

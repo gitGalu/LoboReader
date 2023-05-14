@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { withRouter, useHistory } from "react-router-dom";
-import { useSnackbar } from 'baseui/snackbar';
 import { Spinner } from 'baseui/spinner';
 import { Button, KIND } from 'baseui/button';
 import { TriangleDown } from 'baseui/icon';
@@ -14,8 +13,10 @@ import SearchBox from '../Components/SearchBox';
 import ItemMetadataListItem from '../Components/ItemMetadataListItem'
 import ItemDrawer from '../Components/ItemDrawer';
 import { MasonryInfiniteGrid } from "@egjs/react-infinitegrid";
+import {isMobile, useMobileOrientation, isIPad13, isTablet } from 'react-device-detect';
 
 const Browser = (props) => {
+  const {isLandscape} = useMobileOrientation();
   const [browserItems, setBrowserItems] = useState([]);
   const [page, setPage] = useState(1);
   const [initial, setInitial] = useState(true);
@@ -25,6 +26,7 @@ const Browser = (props) => {
   const [gridView, setGridView] = useState(true);
   const [pending, setPending] = useState(false);
   const [totalItems, setTotalItems] = useState(0);
+  const searchbox = React.useRef(null);
   const drawer = React.useRef()
   const history = useHistory();
   const [searchMode, setSearchMode] = useState(
@@ -33,7 +35,6 @@ const Browser = (props) => {
   const [searchScope, setSearchScope] = useState(
     JSON.parse(localStorage.getItem('browser.searchScope')) || "1"
   );
-  // const { enqueue } = useSnackbar();
 
   useEffect(() => {
     setBrowserItems([]);
@@ -92,19 +93,11 @@ const Browser = (props) => {
         archived: false
       }, identifier)
         .then(function (id) {
-          showNotification();
         });
     } else {
       dbItem.archived = false;
       db.collection.put(dbItem);
     }
-  }
-
-  const showNotification = () => {
-    // enqueue({
-    //   message: 'Item was added.',
-    //   startEnhancer: ({ size }) => <Check size={size} />
-    // })
   }
 
   const query = () => {
@@ -141,7 +134,7 @@ const Browser = (props) => {
     if (event) event.wait();
     ia.SearchAPI.get({
       q: prepareQuery(), fields: ['identifier', 'title', 'mediatype', 'type', 'metadata'],
-      rows: 10,
+      rows: 20,
       page: page,
       sort: ['mediatype asc', 'identifier asc']
     }).then(results => {
@@ -164,9 +157,7 @@ const Browser = (props) => {
 
   const handleSearch = (input) => {
     document.getElementById('search').blur();
-    // history.push(`${process.env.PUBLIC_URL}/browse/s/${input}`);
     history.push(`${process.env.PUBLIC_URL}/browse/s/${input}/`);
-
   }
 
   const getLink = (identifier) => {
@@ -177,9 +168,16 @@ const Browser = (props) => {
     }
   }
 
+  const fillSearchBox = () => {
+    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+    setter.call(searchbox.current, parentIdentifier);
+    searchbox.current.dispatchEvent(new Event('input', { bubbles: true }));
+    searchbox.current && searchbox.current.focus();
+  }
+
   const getHeader = () => {
     if (isSearch) {
-      return "Searching for: " + parentIdentifier;
+      return <span>Searching for <span className='dotted' onClick={ fillSearchBox }>{parentIdentifier}</span></span>;
     } else {
       switch (parentIdentifier) {
         case "magazine_rack":
@@ -194,12 +192,16 @@ const Browser = (props) => {
     }
   }
 
+  const onLayout = (event) => {
+    console.log('onLayout');
+  }
+
   const renderData = () => {
     return (
       <MasonryInfiniteGrid
         className="masonry-container"
         gap={10}
-        column={3}
+        column={isMobile ? ((isTablet || isIPad13) ? (isLandscape ? 8 : 6) : (isLandscape ? 5 : 3)) : 8}
         align={'stretch'}
         useResizeObserver={true}
         observeChildren={true}
@@ -253,6 +255,7 @@ const Browser = (props) => {
       <div style={{ marginTop: '4px', marginRight: '14px', display: 'flex' }}>
         <SearchBox
           id="search"
+          ref={searchbox}
           placeholder={(searchScope == "1") ? 'Search the Magazine Rack' : 'Search the Internet Archive'}
           searchAction={(input) => {
             handleSearch(input);

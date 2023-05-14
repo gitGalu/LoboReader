@@ -17,6 +17,7 @@ const SearchBox = forwardRef((props, ref) => {
   return (
     <Input
       id={props.id}
+      inputRef={ref}
       placeholder={props.placeholder}
       value={value}
       onChange={e => setValue(e.target.value)}

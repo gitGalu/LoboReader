@@ -5,7 +5,7 @@ import {
     ROLE,
     SIZE
 } from 'baseui/modal';
-import React, {forwardRef} from 'react';
+import React from 'react';
 
 import {
     StyledBody,
@@ -40,7 +40,7 @@ const StandaloneWarning = ((props) => {
                         <li>In Chrome (Android), tap the menu overflow button (three dots in the corner) and select "Add to Home screen".</li>
                     </ul>
                     {dismissVisible ?
-                        <p onClick={handleButtonClick} className="standaloneDismiss">Click here only if you have trouble proceeding or if you use unsupported browser.</p>
+                        <p onClick={handleButtonClick} className="dotted">Click here only if you have trouble proceeding or if you use unsupported browser.</p>
                         : <p></p>}
                 </StyledBody>
             </ModalBody>
