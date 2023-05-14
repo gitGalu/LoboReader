@@ -78,8 +78,8 @@ const About = forwardRef((props, ref) => {
                 For changelog, docs &amp; licensing please visit project page on GitHub.
             </ModalBody>
             <ModalFooter style={{paddingBottom: '24px'}}>
-                <Link style={{paddingRight: '12px'}} to={{ pathname: "mailto:developer@galu.info" }} target="_blank"><ModalButton kind="primiary">Contact</ModalButton></Link>
-                <Link to={{ pathname: "https://github.com/gitGalu/LoboReader" }} target="_blank"><ModalButton kind="primiary">Visit GitHub</ModalButton></Link>
+                <a href="mailto:developer@galu.info" target="_blank" style={{paddingRight: '12px'}}><ModalButton kind="primiary">Contact</ModalButton></a>
+                <a href="https://github.com/gitGalu/LoboReader" target="_blank"><ModalButton kind="primiary">Visit GitHub</ModalButton></a>
             </ModalFooter>
         </Modal>
     )
