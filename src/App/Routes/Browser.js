@@ -134,7 +134,7 @@ const Browser = (props) => {
     if (event) event.wait();
     ia.SearchAPI.get({
       q: prepareQuery(), fields: ['identifier', 'title', 'mediatype', 'type', 'metadata'],
-      rows: 20,
+      rows: 40,
       page: page,
       sort: ['mediatype asc', 'identifier asc']
     }).then(results => {
