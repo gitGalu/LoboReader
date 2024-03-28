@@ -7,51 +7,19 @@ const fetchJson = async function (url, options) {
   return await res.json();
 };
 
-class BookMetaAPI {
-  constructor() {
-    this.API_BASE = "https://api.archivelab.org/v1/books/";
-
-  }
-  async get({ identifier = null }) {
-    if (!identifier) {
-      throw new Error("Missing required arg 'identifier'");
-    }
-    const url = `${this.API_BASE}/${identifier}`;
-    return fetchJson(url);
-  }
-  async metadata(identifier) {
-    return await this.get({ identifier });
-  }
-}
-
 class BookManifestAPI {
   constructor() {
-    this.API_BASE = "https://api.archivelab.org/v1/books/";
+    this.API_BASE = "https://iiif.archive.org/iiif/3/";
+
   }
   async get({ identifier = null }) {
     if (!identifier) {
       throw new Error("Missing required arg 'identifier'");
     }
-    const url = `${this.API_BASE}/${identifier}/ia_manifest`;
+    const url = `${this.API_BASE}/${identifier}/manifest.json`;
     return fetchJson(url);
   }
   async metadata(identifier) {
-    return await this.get({ identifier });
-  }
-}
-
-class ExpBookAPI {
-  constructor() {
-    this.API_BASE = "https://api.archivelab.org/v1/books/";
-  }
-  async get({ identifier = null }) {
-    if (!identifier) {
-      throw new Error("Missing required arg 'identifier'");
-    }
-    const url = `${this.API_BASE}/${identifier}/pages`;
-    return fetchJson(url);
-  }
-  async pages(identifier) {
     return await this.get({ identifier });
   }
 }
@@ -82,7 +50,6 @@ class SearchAPI {
     return await this.get({ q });
   }
   buildQueryFromObject(qObject) {
-    // Map dictionary to a key=val search query
     return Object.keys(qObject)
       .map((key) => {
         if (Array.isArray(qObject[key])) {
@@ -97,8 +64,6 @@ class SearchAPI {
 
 const InternetArchive = {
   SearchAPI: new SearchAPI(),
-  ExpBookAPI: new ExpBookAPI(),
-  BookMetaAPI: new BookMetaAPI(),
   BookManifestAPI: new BookManifestAPI()
 };
 

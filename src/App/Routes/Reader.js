@@ -24,8 +24,8 @@ function Reader(props) {
           .then((item) => {
             if (item == undefined) {
               item = {
-                id: bookMetadata.itemId,
-                title: bookMetadata.title,
+                id: id,
+                title: item.label,
                 page: 0,
                 read: false,
                 archived: false
@@ -43,15 +43,15 @@ function Reader(props) {
 
   const getImageItems = (bookMetadata) => {
     let items = [];
-    let pageCount = bookMetadata.numPages;
+    let pageCount = bookMetadata.items.length;
     let image_options = '_h2000';
 
     for (var i = 0; i < pageCount; i++) {
       items.push({
         src: `https://archive.org/download/${id}/page/leaf${i}${image_options}.jpg`,
-        width: bookMetadata.pageWidths[i],
-        height: bookMetadata.pageHeights[i],
-        alt: ''
+        alt: '',
+        width: bookMetadata.items[i].width,
+        height: bookMetadata.items[i].height
       })
     }
     return items;
