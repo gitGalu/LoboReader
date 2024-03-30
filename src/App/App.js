@@ -1,6 +1,6 @@
 import React from 'react';
 import { Helmet } from 'react-helmet';
-import { Route, Switch, withRouter, NavLink } from 'react-router-dom';
+import { Route, Routes, NavLink } from 'react-router-dom';
 import { LightTheme, BaseProvider } from 'baseui';
 import { HeaderNavigation, ALIGN, StyledNavigationList, StyledNavigationItem } from 'baseui/header-navigation';
 import { Button, KIND } from 'baseui/button';
@@ -29,7 +29,7 @@ const App = (props) => {
 
   return (
     <BaseProvider theme={LightTheme}>
-      {!isStandalone() 
+      {!isStandalone()
         ?
         <StandaloneWarning onDismiss={() => acknowledgeStandaloneWarning()} />
         :
@@ -106,17 +106,17 @@ const App = (props) => {
             </div>
           </Layer>
           <div className="container">
-            <Switch>
-              <Route exact path={`${process.env.PUBLIC_URL}/`} children={<Browser />} />
-              <Route exact path={`${process.env.PUBLIC_URL}/browse/s/:searchQuery`} key={Date.now()} children={<Browser />} />
-              <Route exact path={`${process.env.PUBLIC_URL}/browse/:id`} children={<Browser />} />
-              <Route path={`${process.env.PUBLIC_URL}/browse`} children={<Browser />} />
-              <Route exact path={`${process.env.PUBLIC_URL}/collection`} children={<Collection />} />
-              <Route exact path={`${process.env.PUBLIC_URL}/read/:id`} children={<Reader />} />
-              <Route exact path={`${process.env.PUBLIC_URL}/read/:id/p/:prevAction`} children={<Reader />} />
-              <Route exact path={`${process.env.PUBLIC_URL}/read/:id/p/:prevAction/:prevId`} children={<Reader />} />
-              <Route default children={<Browser />} />
-            </Switch>
+            <Routes>
+              <Route path={`${process.env.PUBLIC_URL}/`} element={<Browser />} />
+              <Route path={`${process.env.PUBLIC_URL}/browse/s/:searchQuery`} element={<Browser />} key={Date.now()} />
+              <Route path={`${process.env.PUBLIC_URL}/browse/:id`} element={<Browser />} />
+              <Route path={`${process.env.PUBLIC_URL}/browse`} element={<Browser />} />
+              <Route path={`${process.env.PUBLIC_URL}/collection`} element={<Collection />} />
+              <Route path={`${process.env.PUBLIC_URL}/read/:id`} element={<Reader />} />
+              <Route path={`${process.env.PUBLIC_URL}/read/:id/p/:prevAction`} element={<Reader />} />
+              <Route path={`${process.env.PUBLIC_URL}/read/:id/p/:prevAction/:prevId`} element={<Reader />} />
+              <Route path="*" element={<Browser />} />
+            </Routes>
           </div>
         </SnackbarProvider>
       }
@@ -124,4 +124,4 @@ const App = (props) => {
   );
 }
 
-export default withRouter(App)
+export default App

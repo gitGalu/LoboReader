@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Spinner } from 'baseui/spinner';
 import { Button, KIND, SIZE } from 'baseui/button'
 import { Centered } from '../Components/Centered';
@@ -9,7 +9,7 @@ import ItemMetadataListItem from '../Components/ItemMetadataListItem';
 import { Masonry } from 'masonic';
 
 const Collection = (props) => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const drawer = React.useRef(null);
 
   const [browserItems, setBrowserItems] = useState([]);
@@ -38,7 +38,7 @@ const Collection = (props) => {
     let item = (browserItems.find(obj => {
       return obj.id === identifier
     }));
-    history.push(`${process.env.PUBLIC_URL}/read/${identifier}/p/c`);
+    navigate(`${process.env.PUBLIC_URL}/read/${identifier}/p/c`);
   }
 
   const handleEditClick = (event, item, title) => {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { withRouter, useHistory } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { Spinner } from 'baseui/spinner';
 import { Centered } from '../Components/Centered';
 import PhotoSwipe from 'photoswipe';
@@ -10,11 +10,9 @@ import 'photoswipe/style.css';
 function Reader(props) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState(false);
-  const history = useHistory();
+  const navigate = useNavigate();
 
-  let id = props.match.params.id;
-  let prevAction = props.match.params.prevAction;
-  let prevId = props.match.params.prevId;
+  let { id, prevAction, prevId } = useParams();
 
   useEffect(() => {
     setError(false);
@@ -115,14 +113,14 @@ function Reader(props) {
     setTimeout(() => {
       if (prevAction != undefined && prevId != undefined) {
         if (prevAction == "s") {
-          history.push(`${process.env.PUBLIC_URL}/browse/s/${prevId}`);
+          navigate(`${process.env.PUBLIC_URL}/browse/s/${prevId}`);
         } else {
-          history.push(`${process.env.PUBLIC_URL}/browse/${prevId}`);
+          navigate(`${process.env.PUBLIC_URL}/browse/${prevId}`);
         }
       } else if (prevAction == "c") {
-        history.push(`${process.env.PUBLIC_URL}/collection`);
+        navigate(`${process.env.PUBLIC_URL}/collection`);
       } else {
-        history.push(`${process.env.PUBLIC_URL}/browse`);
+        navigate(`${process.env.PUBLIC_URL}/browse`);
       }
     }, 250);
   }
@@ -144,4 +142,4 @@ function Reader(props) {
   )
 }
 
-export default withRouter(Reader);
+export default Reader;

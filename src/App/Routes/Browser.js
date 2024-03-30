@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { withRouter, useHistory } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { Spinner } from 'baseui/spinner';
 import { Button, KIND } from 'baseui/button';
 import { TriangleDown } from 'baseui/icon';
@@ -28,7 +28,7 @@ const Browser = (props) => {
   const [totalItems, setTotalItems] = useState(0);
   const searchbox = React.useRef(null);
   const drawer = React.useRef()
-  const history = useHistory();
+  const navigate = useNavigate();
   const [searchMode, setSearchMode] = useState(
     JSON.parse(localStorage.getItem('browser.searchMode')) || "1"
   );
@@ -36,20 +36,22 @@ const Browser = (props) => {
     JSON.parse(localStorage.getItem('browser.searchScope')) || "1"
   );
 
+  let { id, searchQuery } = useParams();
+
   useEffect(() => {
     setBrowserItems([]);
     setPage(1);
     setError(false);
     setInitial(true);
 
-    if (props.match.params.searchQuery !== undefined) {
+    if (searchQuery !== undefined) {
       setIsSearch(true);
-      setParentIdentifier(props.match.params.searchQuery);
+      setParentIdentifier(searchQuery);
     } else {
       setIsSearch(false);
-      (props.match.params.id && props.match.params.id !== "s") ? setParentIdentifier(props.match.params.id) : setParentIdentifier("magazine_rack");
+      (id && id !== "s") ? setParentIdentifier(id) : setParentIdentifier("magazine_rack");
     }
-  }, [props.location.pathname]);
+  }, [useLocation()]);
 
   useEffect(() => {
     setBrowserItems([]);
@@ -74,7 +76,7 @@ const Browser = (props) => {
 
   const startReading = (identifier, title) => {
     addToCollection(identifier, title);
-    history.push(getLink(identifier, title));
+    navigate(getLink(identifier, title));
   }
 
   const readLater = (identifier, title) => {
@@ -157,7 +159,7 @@ const Browser = (props) => {
 
   const handleSearch = (input) => {
     document.getElementById('search').blur();
-    history.push(`${process.env.PUBLIC_URL}/browse/s/${input}/`);
+    navigate(`${process.env.PUBLIC_URL}/browse/s/${input}/`);
   }
 
   const getLink = (identifier) => {
@@ -376,4 +378,4 @@ const Browser = (props) => {
   );
 }
 
-export default withRouter(Browser);
+export default Browser;

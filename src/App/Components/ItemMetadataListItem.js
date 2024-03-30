@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, withRouter } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { ListItem } from 'baseui/list';
 import { LazyLoadImage } from 'react-lazy-load-image-component'
 import 'react-lazy-load-image-component/src/effects/opacity.css';
@@ -7,6 +7,8 @@ import { ChevronRight } from "baseui/icon";
 import { Button, KIND, SIZE } from 'baseui/button';
 
 const ItemMetadataListItem = (props) => {
+  let { searchQuery, id, parentIdentifier } = useParams();
+
   const renderItem = () => {
     switch (props.mediatype) {
       case 'collection':
@@ -55,7 +57,7 @@ const ItemMetadataListItem = (props) => {
           className={"gridImg"}
           width={'100%'}
           effect="opacity"
-          key={props.match.params.searchQuery + props.match.params.id + props.match.params.parentIdentifier}
+          key={searchQuery + id + parentIdentifier}
           src={"https://archive.org/services/img/" + props.identifier}
         />
         {(props.mediatype === "collection") ? <div /> : <div />}
@@ -115,4 +117,4 @@ const ItemMetadataListItem = (props) => {
   )
 }
 
-export default withRouter(ItemMetadataListItem);
+export default ItemMetadataListItem;
