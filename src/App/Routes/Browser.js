@@ -124,7 +124,7 @@ const Browser = (props) => {
       }
       return q;
     } else {
-      return 'collection:("' + parentIdentifier + '" AND mediatype:(collection OR texts))';
+      return 'collection:("' + parentIdentifier + '") AND mediatype:(collection OR texts)';
     }
   }
 
