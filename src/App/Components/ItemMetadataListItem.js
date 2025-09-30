@@ -56,9 +56,9 @@ const ItemMetadataListItem = (props) => {
         <img
           className={"gridImg"}
           width={'100%'}
-          effect="opacity"
           key={searchQuery + id + parentIdentifier}
           src={"https://archive.org/services/img/" + props.identifier}
+          onLoad={props.onImageLoad}
         />
         {(props.mediatype === "collection") ? <div /> : <div />}
         <div className={"cardoverlay"} />

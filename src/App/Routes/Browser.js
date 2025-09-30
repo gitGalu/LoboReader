@@ -26,6 +26,8 @@ const Browser = (props) => {
   const [gridView, setGridView] = useState(true);
   const [pending, setPending] = useState(false);
   const [totalItems, setTotalItems] = useState(0);
+  const [renderReady, setRenderReady] = useState(false);
+  const [loadedImages, setLoadedImages] = useState(0);
   const searchbox = React.useRef(null);
   const drawer = React.useRef()
   const navigate = useNavigate();
@@ -43,6 +45,8 @@ const Browser = (props) => {
     setPage(1);
     setError(false);
     setInitial(true);
+    setRenderReady(false);
+    setLoadedImages(0);
 
     if (searchQuery !== undefined) {
       setIsSearch(true);
@@ -55,8 +59,17 @@ const Browser = (props) => {
 
   useEffect(() => {
     setBrowserItems([]);
+    setRenderReady(false);
+    setLoadedImages(0);
     reloadQuery();
   }, [parentIdentifier]);
+
+  useEffect(() => {
+    const minImages = Math.min(20, browserItems.length);
+    if (!initial && browserItems.length > 0 && loadedImages >= minImages) {
+      setRenderReady(true);
+    }
+  }, [initial, browserItems.length, loadedImages]);
 
   const reloadQuery = () => {
     setPage(1);
@@ -72,6 +85,10 @@ const Browser = (props) => {
         var archived = (dbItem !== undefined) ? dbItem.archived : false;
         drawer.current.showDrawer(identifier, title, { existing: existing, archived: archived });
       });
+  }
+
+  const handleImageLoad = () => {
+    setLoadedImages(prev => prev + 1);
   }
 
   const startReading = (identifier, title) => {
@@ -223,6 +240,7 @@ const Browser = (props) => {
               mediatype={item.mediatype}
               gridView={gridView}
               onSelectItem={(e, identifier, title) => handleItemClick(e, identifier, title)}
+              onImageLoad={handleImageLoad}
             />
           </div>
         )
@@ -369,7 +387,12 @@ const Browser = (props) => {
           error ? renderError() :
             (browserItems.length > 0 && !initial)
               ?
-              renderData()
+              <>
+                {!renderReady && <Centered><Spinner /></Centered>}
+                <div style={{ opacity: renderReady ? 1 : 0, pointerEvents: renderReady ? 'auto' : 'none' }}>
+                  {renderData()}
+                </div>
+              </>
               :
               renderEmpty()
         }
