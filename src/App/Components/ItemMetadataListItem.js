@@ -58,6 +58,7 @@ const ItemMetadataListItem = (props) => {
           width={'100%'}
           key={searchQuery + id + parentIdentifier}
           src={"https://archive.org/services/img/" + props.identifier}
+          loading="lazy"
           onLoad={props.onImageLoad}
         />
         {(props.mediatype === "collection") ? <div /> : <div />}

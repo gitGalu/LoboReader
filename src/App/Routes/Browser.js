@@ -12,25 +12,31 @@ import { Centered } from '../Components/Centered';
 import SearchBox from '../Components/SearchBox';
 import ItemMetadataListItem from '../Components/ItemMetadataListItem'
 import ItemDrawer from '../Components/ItemDrawer';
-import { MasonryInfiniteGrid } from "@egjs/react-infinitegrid";
-import {isMobile, useMobileOrientation, isIPad13, isTablet } from 'react-device-detect';
+import Masonry from 'masonry-layout';
+import { isMobile, isIPad13, isTablet } from 'react-device-detect';
 
 const Browser = (props) => {
-  const {isLandscape} = useMobileOrientation();
   const [browserItems, setBrowserItems] = useState([]);
   const [page, setPage] = useState(1);
   const [initial, setInitial] = useState(true);
   const [error, setError] = useState(false);
   const [isSearch, setIsSearch] = useState(false);
   const [parentIdentifier, setParentIdentifier] = useState(undefined);
-  const [gridView, setGridView] = useState(true);
+  const [gridView] = useState(true);
   const [pending, setPending] = useState(false);
+  const pendingRef = React.useRef(false);
   const [totalItems, setTotalItems] = useState(0);
   const [renderReady, setRenderReady] = useState(false);
   const [loadedImages, setLoadedImages] = useState(0);
+  const [viewportWidth, setViewportWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+  const masonryContainerRef = React.useRef(null);
+  const masonryInstance = React.useRef(null);
+  const prevColumnCount = React.useRef(null);
+  const sentinelRef = React.useRef(null);
   const searchbox = React.useRef(null);
   const drawer = React.useRef()
   const navigate = useNavigate();
+  const resizeTimeout = React.useRef(null);
   const [searchMode, setSearchMode] = useState(
     JSON.parse(localStorage.getItem('browser.searchMode')) || "1"
   );
@@ -47,6 +53,8 @@ const Browser = (props) => {
     setInitial(true);
     setRenderReady(false);
     setLoadedImages(0);
+    masonryInstance.current?.destroy();
+    masonryInstance.current = null;
 
     if (searchQuery !== undefined) {
       setIsSearch(true);
@@ -65,11 +73,103 @@ const Browser = (props) => {
   }, [parentIdentifier]);
 
   useEffect(() => {
+    return () => {
+      masonryInstance.current?.destroy();
+      masonryInstance.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleDebounced = () => {
+      if (resizeTimeout.current) {
+        clearTimeout(resizeTimeout.current);
+      }
+      resizeTimeout.current = setTimeout(() => {
+        setViewportWidth(window.innerWidth || 1200);
+        masonryInstance.current?.reloadItems();
+        masonryInstance.current?.layout();
+      }, 120);
+    };
+    window.addEventListener('resize', handleDebounced);
+    window.addEventListener('orientationchange', handleDebounced);
+    return () => {
+      window.removeEventListener('resize', handleDebounced);
+      window.removeEventListener('orientationchange', handleDebounced);
+      if (resizeTimeout.current) {
+        clearTimeout(resizeTimeout.current);
+      }
+    };
+  }, []);
+
+
+  useEffect(() => {
     const minImages = Math.min(20, browserItems.length);
     if (!initial && browserItems.length > 0 && loadedImages >= minImages) {
       setRenderReady(true);
     }
   }, [initial, browserItems.length, loadedImages]);
+
+  const gutter = 10;
+
+  const getColumnCount = () => {
+    if (!gridView) return 1;
+    const width = viewportWidth;
+
+    if (isMobile && !isTablet && !isIPad13) {
+      if (width >= 900) return 5;
+      if (width >= 640) return 4;
+      return 3;
+    }
+    if (width >= 1440) return 8;
+    if (width >= 1280) return 7;
+    if (width >= 1120) return 6;
+    if (width >= 960) return 5;
+    if (width >= 760) return 4;
+    return 3;
+  };
+
+  const columnCount = getColumnCount();
+  const columnWidthValue = gridView
+    ? `calc((100% - ${(columnCount - 1) * gutter}px)/${columnCount})`
+    : '100%';
+
+  useEffect(() => {
+    if (!masonryContainerRef.current) {
+      return;
+    }
+    const needsNewInstance = !masonryInstance.current || prevColumnCount.current !== columnCount;
+    if (needsNewInstance) {
+      masonryInstance.current = new Masonry(masonryContainerRef.current, {
+        itemSelector: '.masonry-item',
+        columnWidth: '.masonry-sizer',
+        gutter,
+        percentPosition: true,
+        transitionDuration: '0.15s'
+      });
+    } else {
+      masonryInstance.current.options.gutter = gutter;
+    }
+
+    const masonry = masonryInstance.current;
+    masonry.reloadItems();
+    requestAnimationFrame(() => masonry.layout());
+    prevColumnCount.current = columnCount;
+  }, [browserItems, gridView, gutter, columnWidthValue, renderReady, columnCount]);
+
+  useEffect(() => {
+    if (!sentinelRef.current || browserItems.length === 0 || !renderReady || loadedImages < Math.min(5, browserItems.length)) {
+      return;
+    }
+    const observer = new IntersectionObserver((entries) => {
+      const entry = entries[0];
+      if (entry.isIntersecting && !pending && browserItems.length < totalItems) {
+        fetchData();
+      }
+    }, { rootMargin: '400px' });
+
+    observer.observe(sentinelRef.current);
+    return () => observer.disconnect();
+  }, [pending, browserItems.length, totalItems, renderReady]);
 
   const reloadQuery = () => {
     setPage(1);
@@ -89,6 +189,7 @@ const Browser = (props) => {
 
   const handleImageLoad = () => {
     setLoadedImages(prev => prev + 1);
+    requestAnimationFrame(() => masonryInstance.current?.layout());
   }
 
   const startReading = (identifier, title) => {
@@ -145,12 +246,12 @@ const Browser = (props) => {
     }
   }
 
-  const fetchData = (event) => {
-    if (pending) {
+  const fetchData = () => {
+    if (pendingRef.current || pending) {
       return;
     }
+    pendingRef.current = true;
     setPending(true);
-    if (event) event.wait();
     ia.SearchAPI.get({
       q: prepareQuery(), fields: ['identifier', 'title', 'mediatype', 'type', 'metadata'],
       rows: 40,
@@ -160,17 +261,16 @@ const Browser = (props) => {
       let dox = results.response.docs;
       dox.sort((a, b) => (a.title > b.title) ? 1 : ((b.title > a.title) ? -1 : 0))
       dox.sort((a, b) => (a.mediaType > b.mediaType) ? 1 : ((b.mediaType > a.mediaType) ? -1 : 0))
-      dox = browserItems.concat(dox);
-      setBrowserItems(dox);
+      setBrowserItems(prev => prev.concat(dox));
       setTotalItems(results.response.numFound);
       setInitial(false);
-      setPage(page + 1);
+      setPage(prev => prev + 1);
       setPending(false);
-      if (event) event.ready();
+      pendingRef.current = false;
     }).catch(err => {
+      pendingRef.current = false;
       setPending(false);
       setError(true);
-      if (event) event.ready();
     });
   };
 
@@ -211,41 +311,31 @@ const Browser = (props) => {
     }
   }
 
-  const onLayout = (event) => {
-    console.log('onLayout');
-  }
-
   const renderData = () => {
     return (
-      <MasonryInfiniteGrid
-        className="masonry-container"
-        gap={10}
-        column={isMobile ? ((isTablet || isIPad13) ? (isLandscape ? 8 : 6) : (isLandscape ? 5 : 3)) : 8}
-        align={'stretch'}
-        useResizeObserver={true}
-        observeChildren={true}
-        loading={<div className="loading"><Spinner /></div>}
-        onRequestAppend={(e) => {
-          if (browserItems.length < totalItems) {
-            fetchData(e);
-          }
-        }}
-      >
-        {browserItems.map((item) =>
-          <div className="masonry-item">
-            <ItemMetadataListItem
+      <>
+        <div className="masonry-container" ref={masonryContainerRef}>
+          <div className="masonry-sizer" style={{ width: columnWidthValue }} aria-hidden />
+          {browserItems.map((item) =>
+            <div
+              className="masonry-item"
               key={item.identifier}
-              title={item.title}
-              identifier={item.identifier}
-              mediatype={item.mediatype}
-              gridView={gridView}
-              onSelectItem={(e, identifier, title) => handleItemClick(e, identifier, title)}
-              onImageLoad={handleImageLoad}
-            />
-          </div>
-        )
-        }
-      </MasonryInfiniteGrid>
+              style={{ width: columnWidthValue, marginBottom: `${gutter}px` }}
+            >
+              <ItemMetadataListItem
+                title={item.title}
+                identifier={item.identifier}
+                mediatype={item.mediatype}
+                gridView={gridView}
+                onSelectItem={(e, identifier, title) => handleItemClick(e, identifier, title)}
+                onImageLoad={handleImageLoad}
+              />
+            </div>
+          )}
+        </div>
+        <div ref={sentinelRef} className="masonry-sentinel" />
+        {pending && <div className="loading"><Spinner /></div>}
+      </>
     )
   }
 

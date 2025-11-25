@@ -199,13 +199,22 @@ ul {
 
 .masonry-container {
   width: 100%;
-  height: 100%;
+  position: relative;
+}
+
+.masonry-sizer {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .masonry-item {
-  display: inline-block !important;
   opacity: 1;
-  transition: all 1s;
+  transition: all 0.2s;
+}
+
+.masonry-sentinel {
+  width: 100%;
+  height: 1px;
 }
 
 .dotted {
