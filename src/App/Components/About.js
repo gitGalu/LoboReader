@@ -66,7 +66,24 @@ const About = forwardRef((props, ref) => {
             animate
             autoFocus
             size={SIZE.default}
-            role={ROLE.dialog}>
+            role={ROLE.dialog}
+            overrides={{
+                Root: {
+                    style: {
+                        zIndex: 2100
+                    }
+                },
+                DialogContainer: {
+                    style: {
+                        zIndex: 2100
+                    }
+                },
+                Dialog: {
+                    style: {
+                        zIndex: 2101
+                    }
+                }
+            }}>
             <ModalHeader>LoboReader<br />for Internet Archive</ModalHeader>
             <ModalBody>
                 Build date: {dateTimeStamp}<br /><br />
