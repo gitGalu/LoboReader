@@ -424,7 +424,7 @@ const Browser = (props) => {
         </div>
         <div ref={sentinelRef} className="masonry-sentinel" />
         {pending && !refreshing && (
-          <div className="loadingState loadingState--more">
+          <div className="loadingState loadingState--floating">
             <span className="loadingSpinner" aria-hidden="true" />
             <span>Loading...</span>
           </div>
