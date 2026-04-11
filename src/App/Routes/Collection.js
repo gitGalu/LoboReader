@@ -156,7 +156,7 @@ const Collection = (props) => {
       onEditClick={(event) => handleEditClick(event, id, title)}
       onSelectItem={(event) => handleItemClick(event, id)}
       onImageLoad={handleImageLoad}
-      showGridTitle={gridView}
+      showGridTitle={false}
     />
   );
 
