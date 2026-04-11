@@ -23,10 +23,22 @@ const App = (props) => {
 
   const browseBase = `${process.env.PUBLIC_URL}/browse`;
   const collectionBase = `${process.env.PUBLIC_URL}/collection`;
-  const browseActive = navigationLocation.pathname === `${process.env.PUBLIC_URL}` ||
-    navigationLocation.pathname === `${process.env.PUBLIC_URL}/` ||
-    navigationLocation.pathname.startsWith(browseBase);
-  const collectionActive = navigationLocation.pathname.startsWith(collectionBase);
+  const pathname = navigationLocation.pathname;
+  const browseActive = pathname === '/' ||
+    pathname === `${process.env.PUBLIC_URL}` ||
+    pathname === `${process.env.PUBLIC_URL}/` ||
+    pathname.startsWith(browseBase);
+  const collectionActive = pathname.startsWith(collectionBase);
+  const menuButtonOverrides = {
+    Root: {
+      style: {
+        borderTopLeftRadius: '0',
+        borderTopRightRadius: '0',
+        borderBottomRightRadius: '0',
+        borderBottomLeftRadius: '0'
+      }
+    }
+  };
 
   const isStandalone = () => {
     const matchMediaResult = typeof window.matchMedia === 'function'
@@ -104,12 +116,15 @@ const App = (props) => {
                     to={browseBase}
                     className={browseActive ? 'menuActive' : undefined}>
                     <Button
-                      kind={browseActive ? KIND.secondary : KIND.tertiary}>Browse</Button>
+                      kind={browseActive ? KIND.secondary : KIND.tertiary}
+                      overrides={menuButtonOverrides}>Browse</Button>
                   </NavLink>
                   <NavLink
                     to={collectionBase}
                     className={collectionActive ? 'menuActive' : undefined}>
-                    <Button kind={collectionActive ? KIND.secondary : KIND.tertiary}>Collection</Button>
+                    <Button
+                      kind={collectionActive ? KIND.secondary : KIND.tertiary}
+                      overrides={menuButtonOverrides}>Collection</Button>
                   </NavLink>
                 </div>
               </div>
