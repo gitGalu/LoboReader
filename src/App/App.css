@@ -13,6 +13,9 @@
   --app-route-controls-z: 10;
   --app-loading-z: 900;
   --app-chrome-z: 1000;
+  --app-safe-area-top: env(safe-area-inset-top, 0px);
+  --pwa-safe-area-background: #ffffff;
+  --pwa-safe-area-opacity: 0;
 }
 
 a {
@@ -20,9 +23,34 @@ a {
 }
 
 body {
+  background: #ffffff;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   overscroll-behavior-y: none;
   user-select: none;
+}
+
+.pwaSafeAreaBackdrop {
+  background: var(--pwa-safe-area-background);
+  height: var(--app-safe-area-top);
+  left: 0;
+  opacity: var(--pwa-safe-area-opacity);
+  pointer-events: none;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 100300;
+}
+
+body.pwaChromeActive::before {
+  background: var(--pwa-safe-area-background);
+  content: '';
+  height: var(--app-safe-area-top);
+  left: 0;
+  pointer-events: none;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 100301;
 }
 
 .listImg {
@@ -63,6 +91,7 @@ body {
 .anchored-top {
   width: 100%;
   background-color: #ffffff88;
+  padding-top: var(--app-safe-area-top);
   position: fixed !important;
   top: 0 !important;
   left: 0;
@@ -72,7 +101,7 @@ body {
 }
 
 .page {
-  padding-top: 112px;
+  padding-top: calc(112px + var(--app-safe-area-top));
 }
 
 .description {
@@ -263,6 +292,8 @@ li.textContent {
     --pswp-icon-color: #eeeeee;
     --pswp-icon-color-secondary: #333333;
     --pswp-bg: #000000;
+    height: calc(100% + var(--app-safe-area-top)) !important;
+    top: calc(-1 * var(--app-safe-area-top)) !important;
 }
 
 .pswp__counter {
@@ -282,7 +313,7 @@ ul {
 .pswp__preloader {
   margin-left: 14px !important;
   margin-right: auto !important;
-  margin-top: 5px !important;
+  margin-top: calc(var(--app-safe-area-top) + 5px) !important;
   pointer-events: none !important;
 }
 

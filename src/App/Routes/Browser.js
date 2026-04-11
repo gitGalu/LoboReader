@@ -10,6 +10,7 @@ import db from '../Components/Db';
 import SearchBox from '../Components/SearchBox';
 import ItemMetadataListItem from '../Components/ItemMetadataListItem'
 import ItemDrawer from '../Components/ItemDrawer';
+import { setPwaChromeColor } from '../Components/PwaChrome';
 import Masonry from 'masonry-layout';
 import { isMobile, isIPad13, isTablet } from 'react-device-detect';
 
@@ -313,6 +314,7 @@ const Browser = (props) => {
   const startReading = (identifier, title) => {
     addToCollection(identifier, title);
     drawer.current?.hideDrawer();
+    setPwaChromeColor('#000000');
     navigate(getLink(identifier), { state: { backgroundLocation: location } });
   }
 

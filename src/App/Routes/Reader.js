@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { Button, KIND, SIZE as BUTTON_SIZE } from 'baseui/button';
@@ -8,6 +8,7 @@ import { Centered } from '../Components/Centered';
 import PhotoSwipe from 'photoswipe';
 import InternetArchive from '../Components/InternetArchive';
 import db from '../Components/Db';
+import { resetPwaChromeColor, setPwaChromeColor } from '../Components/PwaChrome';
 import 'photoswipe/style.css';
 
 function Reader(props) {
@@ -25,6 +26,11 @@ function Reader(props) {
   const closeHandledRef = useRef(false);
 
   let { id, prevAction, prevId } = useParams();
+
+  useLayoutEffect(() => {
+    setPwaChromeColor('#000000');
+    return resetPwaChromeColor;
+  }, []);
 
   const getManifestTitle = useCallback((bookMetadata) => {
     const label = bookMetadata?.label;

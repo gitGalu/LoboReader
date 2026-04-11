@@ -4,6 +4,7 @@ import { Button, KIND, SIZE } from 'baseui/button'
 import db from '../Components/Db';
 import ItemDrawer from '../Components/ItemDrawer';
 import ItemMetadataListItem from '../Components/ItemMetadataListItem';
+import { setPwaChromeColor } from '../Components/PwaChrome';
 import Masonry from 'masonry-layout';
 
 const Collection = (props) => {
@@ -126,6 +127,7 @@ const Collection = (props) => {
   }
 
   const handleItemClick = async (event, identifier) => {
+    setPwaChromeColor('#000000');
     navigate(`${process.env.PUBLIC_URL}/read/${identifier}/p/c`, { state: { backgroundLocation: location } });
   }
 

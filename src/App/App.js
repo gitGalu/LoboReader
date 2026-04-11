@@ -11,6 +11,7 @@ import Collection from './Routes/Collection';
 import Reader from './Routes/Reader';
 import About from './Components/About';
 import StandaloneWarning from './Components/StandaloneWarning';
+import { resetPwaChromeColor } from './Components/PwaChrome';
 import './App.css';
 
 const App = (props) => {
@@ -41,6 +42,10 @@ const App = (props) => {
     setAckPwa(true);
   }
 
+  React.useEffect(() => {
+    resetPwaChromeColor();
+  }, []);
+
   return (
     <BaseProvider theme={LightTheme}>
       {!isStandalone()
@@ -51,9 +56,10 @@ const App = (props) => {
           <Helmet>
             <title>LoboReader</title>
             <meta charSet="utf-8" />
-            <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"></meta>
+            <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"></meta>
             <meta name="robots" content="noindex" />
           </Helmet>
+          <div className="pwaSafeAreaBackdrop" aria-hidden="true" />
           <About ref={drawer}></About>
           <Layer>
             <div className="anchored-top">

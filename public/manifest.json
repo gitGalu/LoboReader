@@ -2,6 +2,7 @@
   "short_name": "LoboReader",
   "version": "0.4.3",
   "name": "LoboReader for Internet Archive",
+  "theme_color": "#ffffff",
   "background_color": "white",
   "icons": [
     {
