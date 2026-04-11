@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom';
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { Button, KIND, SIZE as BUTTON_SIZE } from 'baseui/button';
 import { Slider } from 'baseui/slider';
-import { Spinner } from 'baseui/spinner';
 import { Centered } from '../Components/Centered';
 import PhotoSwipe from 'photoswipe';
 import InternetArchive from '../Components/InternetArchive';
@@ -297,6 +296,14 @@ function Reader(props) {
     return createPortal(controls, document.body);
   }
 
+  const renderReaderLoadingOverlay = () => createPortal(
+    <div className="readerLaunchOverlay">
+      <span className="loadingSpinner" aria-hidden="true" />
+      <span>Loading...</span>
+    </div>,
+    document.body
+  );
+
   useEffect(() => {
     let cancelled = false;
 
@@ -370,7 +377,7 @@ function Reader(props) {
           !open
             ?
             (<div>
-              <div className="page"><br /><Centered><Spinner /></Centered></div>
+              {renderReaderLoadingOverlay()}
             </div>)
             :
             (<div>

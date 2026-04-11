@@ -448,6 +448,25 @@ ul {
   z-index: var(--app-loading-z);
 }
 
+.readerLaunchOverlay {
+  align-items: center;
+  background: #000000;
+  color: #d8d8d8;
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  gap: 12px;
+  inset: 0;
+  justify-content: center;
+  position: fixed;
+  z-index: 100400;
+}
+
+.readerLaunchOverlay .loadingSpinner {
+  border-color: #333333;
+  border-top-color: #f2f2f2;
+}
+
 .readerControls {
   opacity: 1;
   transition: opacity 0.18s ease;
