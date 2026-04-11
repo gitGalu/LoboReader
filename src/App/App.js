@@ -29,16 +29,23 @@ const App = (props) => {
     pathname === `${process.env.PUBLIC_URL}/` ||
     pathname.startsWith(browseBase);
   const collectionActive = pathname.startsWith(collectionBase);
-  const menuButtonOverrides = {
+  const getMenuButtonOverrides = (active) => ({
     Root: {
       style: {
+        backgroundColor: active ? '#f6f6f688' : 'transparent',
         borderTopLeftRadius: '0',
         borderTopRightRadius: '0',
         borderBottomRightRadius: '0',
-        borderBottomLeftRadius: '0'
+        borderBottomLeftRadius: '0',
+        ':hover': {
+          backgroundColor: active ? '#f6f6f688' : 'rgba(246, 246, 246, 0.32)'
+        },
+        ':active': {
+          backgroundColor: active ? '#f6f6f688' : 'rgba(246, 246, 246, 0.48)'
+        }
       }
     }
-  };
+  });
 
   const isStandalone = () => {
     const matchMediaResult = typeof window.matchMedia === 'function'
@@ -117,14 +124,14 @@ const App = (props) => {
                     className={browseActive ? 'menuActive' : undefined}>
                     <Button
                       kind={browseActive ? KIND.secondary : KIND.tertiary}
-                      overrides={menuButtonOverrides}>Browse</Button>
+                      overrides={getMenuButtonOverrides(browseActive)}>Browse</Button>
                   </NavLink>
                   <NavLink
                     to={collectionBase}
                     className={collectionActive ? 'menuActive' : undefined}>
                     <Button
                       kind={collectionActive ? KIND.secondary : KIND.tertiary}
-                      overrides={menuButtonOverrides}>Collection</Button>
+                      overrides={getMenuButtonOverrides(collectionActive)}>Collection</Button>
                   </NavLink>
                 </div>
               </div>
