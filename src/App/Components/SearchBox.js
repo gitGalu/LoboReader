@@ -11,6 +11,8 @@ const SearchBox = forwardRef((props, ref) => {
         props.searchAction(value);
         return;
       }
+      default:
+        return;
     }
   };
 

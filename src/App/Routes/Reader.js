@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom'
 import { Spinner } from 'baseui/spinner';
 import { Centered } from '../Components/Centered';
@@ -11,51 +11,72 @@ function Reader(props) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState(false);
   const navigate = useNavigate();
+  const pswpRef = useRef(null);
 
   let { id, prevAction, prevId } = useParams();
 
-  useEffect(() => {
-    setError(false);
-    InternetArchive.BookManifestAPI.get({ identifier: id })
-      .then(bookMetadata => {
-        db.collection.get({ id: id })
-          .then((item) => {
-            if (item == undefined) {
-              item = {
-                id: id,
-                title: item.label,
-                page: 0,
-                read: false,
-                archived: false
-              }
-              db.collection.put(item, id);
-            }
-            let pages = getImageItems(bookMetadata);
-            setOpen(true);
-            initPhotoSwipe(pages, item);
-          })
-      }).catch(err => {
-        setError(true);
-      });
-  }, []);
+  const getManifestTitle = useCallback((bookMetadata) => {
+    const label = bookMetadata?.label;
 
-  const getImageItems = (bookMetadata) => {
-    let items = [];
-    let pageCount = bookMetadata.items.length;
-    let image_options = '_h2000';
-
-    for (var i = 0; i < pageCount; i++) {
-      items.push({
-        src: `https://archive.org/download/${id}/page/leaf${i}${image_options}.jpg`,
-        alt: '',
-        width: bookMetadata.items[i].width,
-        height: bookMetadata.items[i].height
-      })
+    if (typeof label === 'string') {
+      return label;
     }
-    return items;
-  }
 
-  const initPhotoSwipe = (pages, item) => {
+    if (label?.none?.length) {
+      return label.none[0];
+    }
+
+    return id;
+  }, [id]);
+
+  const getImageItems = useCallback((bookMetadata) => {
+    const pageCount = bookMetadata?.items?.length ?? 0;
+    const imageOptions = '_h2000';
+
+    return Array.from({ length: pageCount }, (_, index) => ({
+      src: `https://archive.org/download/${id}/page/leaf${index}${imageOptions}.jpg`,
+      alt: '',
+      width: bookMetadata.items[index].width,
+      height: bookMetadata.items[index].height
+    }));
+  }, [id]);
+
+  const close = useCallback(() => {
+    setTimeout(() => {
+      if (prevAction !== undefined && prevId !== undefined) {
+        if (prevAction === "s") {
+          navigate(`${process.env.PUBLIC_URL}/browse/s/${prevId}`);
+        } else {
+          navigate(`${process.env.PUBLIC_URL}/browse/${prevId}`);
+        }
+      } else if (prevAction === "c") {
+        navigate(`${process.env.PUBLIC_URL}/collection`);
+      } else {
+        navigate(`${process.env.PUBLIC_URL}/browse`);
+      }
+    }, 250);
+  }, [navigate, prevAction, prevId]);
+
+  const updateIndex = useCallback(async (pageNum, currentItem) => {
+    if (!currentItem) {
+      return;
+    }
+
+    const updatedItem = {
+      ...currentItem,
+      page: pageNum,
+      lastOpenedAt: new Date().toISOString(),
+      read: pageNum >= 1 && pageNum === currentItem.pageCount - 1
+    };
+
+    await db.collection.put(updatedItem, id);
+  }, [id]);
+
+  const initPhotoSwipe = useCallback((pages, item) => {
+    const currentItem = {
+      ...item,
+      pageCount: pages.length
+    };
     const options = {
       mainClass: 'pswp--styles',
       arrowPrev: false,
@@ -72,16 +93,22 @@ function Reader(props) {
       preloaderDelay: 0,
       errorMsg: 'The page cannot be loaded',
       dataSource: pages,
-      index: item.page,
-      doubleTapAction: (a, e) => {
-        let clickX = a.x;
-        let pageX = pswp.currSlide.panAreaSize.x;
-        let centerX = pageX / 2;
-        let fix = (clickX - centerX) / 2;
+      index: currentItem.page,
+      doubleTapAction: (point) => {
+        const pswp = pswpRef.current;
+
+        if (!pswp?.currSlide) {
+          return;
+        }
+
+        let clickX = point.x;
+        const pageX = pswp.currSlide.panAreaSize.x;
+        const centerX = pageX / 2;
+        const fix = (clickX - centerX) / 2;
         clickX = clickX + fix;
 
-        if (pswp.currSlide.currZoomLevel == pswp.currSlide.zoomLevels.initial) {
-          pswp.currSlide.zoomTo(pswp.currSlide.zoomLevels.fit * 2.75, { x: clickX, y: a.y }, 0, true);
+        if (pswp.currSlide.currZoomLevel === pswp.currSlide.zoomLevels.initial) {
+          pswp.currSlide.zoomTo(pswp.currSlide.zoomLevels.fit * 2.75, { x: clickX, y: point.y }, 0, true);
         } else {
           pswp.currSlide.currentResolution = 0;
           pswp.currSlide.zoomAndPanToInitial();
@@ -91,39 +118,84 @@ function Reader(props) {
       }
     };
 
-    let pswp = new PhotoSwipe(options);
+    const pswp = new PhotoSwipe(options);
+    pswpRef.current = pswp;
 
     pswp.on('change', () => {
-      updateIndex(pswp.currIndex, item);
+      currentItem.page = pswp.currIndex;
+      updateIndex(pswp.currIndex, currentItem);
     });
 
     pswp.on('close', () => {
       close();
-    })
+    });
 
     pswp.init();
-  }
+  }, [close, updateIndex]);
 
-  const updateIndex = async (pagenum, currentItem) => {
-    currentItem.page = pagenum;
-    db.collection.put(currentItem, id);
-  }
+  useEffect(() => {
+    let cancelled = false;
 
-  const close = () => {
-    setTimeout(() => {
-      if (prevAction != undefined && prevId != undefined) {
-        if (prevAction == "s") {
-          navigate(`${process.env.PUBLIC_URL}/browse/s/${prevId}`);
-        } else {
-          navigate(`${process.env.PUBLIC_URL}/browse/${prevId}`);
+    const loadReader = async () => {
+      setOpen(false);
+      setError(false);
+
+      try {
+        const bookMetadata = await InternetArchive.BookManifestAPI.get({ identifier: id });
+        if (cancelled) {
+          return;
         }
-      } else if (prevAction == "c") {
-        navigate(`${process.env.PUBLIC_URL}/collection`);
-      } else {
-        navigate(`${process.env.PUBLIC_URL}/browse`);
+
+        let item = await db.collection.get({ id });
+        const fallbackTitle = getManifestTitle(bookMetadata);
+
+        if (item === undefined) {
+          item = {
+            id,
+            title: fallbackTitle,
+            page: 0,
+            read: false,
+            archived: false,
+            lastOpenedAt: new Date().toISOString()
+          };
+        } else {
+          item = {
+            ...item,
+            title: item.title || fallbackTitle,
+            archived: false,
+            lastOpenedAt: new Date().toISOString()
+          };
+        }
+
+        await db.collection.put(item, id);
+        if (cancelled) {
+          return;
+        }
+
+        const pages = getImageItems(bookMetadata);
+        if (pages.length === 0) {
+          throw new Error('No readable pages found');
+        }
+
+        setOpen(true);
+        initPhotoSwipe(pages, item);
+      } catch (err) {
+        if (!cancelled) {
+          setError(true);
+        }
       }
-    }, 250);
-  }
+    };
+
+    loadReader();
+
+    return () => {
+      cancelled = true;
+      if (pswpRef.current) {
+        pswpRef.current.destroy();
+        pswpRef.current = null;
+      }
+    };
+  }, [getImageItems, getManifestTitle, id, initPhotoSwipe]);
 
   return (
     <div>

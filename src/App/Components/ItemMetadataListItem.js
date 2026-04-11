@@ -8,6 +8,11 @@ import { Button, KIND, SIZE } from 'baseui/button';
 
 const ItemMetadataListItem = (props) => {
   let { searchQuery, id, parentIdentifier } = useParams();
+  const [imageReady, setImageReady] = React.useState(false);
+
+  React.useEffect(() => {
+    setImageReady(false);
+  }, [props.identifier]);
 
   const renderItem = () => {
     switch (props.mediatype) {
@@ -51,24 +56,36 @@ const ItemMetadataListItem = (props) => {
   }
 
   const renderGridElement = () => {
+    const showGridTitle = imageReady && (props.mediatype === "collection" || props.showGridTitle);
+
     return (
-      <div >
-        <img
-          className={"gridImg"}
-          width={'100%'}
-          key={searchQuery + id + parentIdentifier}
-          src={"https://archive.org/services/img/" + props.identifier}
-          loading="lazy"
-          onLoad={props.onImageLoad}
-        />
-        {(props.mediatype === "collection") ? <div /> : <div />}
+      <div className="gridCard">
+        <div className="gridCardMedia">
+          <img
+            className="gridImg"
+            width={'100%'}
+            key={searchQuery + id + parentIdentifier}
+            src={"https://archive.org/services/img/" + props.identifier}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            onLoad={() => {
+              setImageReady(true);
+              props.onImageLoad && props.onImageLoad();
+            }}
+            onError={() => {
+              setImageReady(true);
+              props.onImageLoad && props.onImageLoad();
+            }}
+          />
+        </div>
         <div className={"cardoverlay"} />
         {
-          (props.mediatype === "collection") ?
+          showGridTitle ?
             <div className="collectionLabel">{props.title}</div>
             : <div />
         }
-      </div >
+      </div>
     );
   }
 
@@ -103,6 +120,7 @@ const ItemMetadataListItem = (props) => {
           effect="opacity"
           key={"https://archive.org/services/img/" + props.identifier}
           src={"https://archive.org/services/img/" + props.identifier}
+          alt=""
           width={'64px'}
         />
 

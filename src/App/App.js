@@ -1,10 +1,9 @@
 import React from 'react';
 import { Helmet } from 'react-helmet';
-import { Route, Routes, NavLink } from 'react-router-dom';
+import { Route, Routes, NavLink, useLocation } from 'react-router-dom';
 import { LightTheme, BaseProvider } from 'baseui';
 import { HeaderNavigation, ALIGN, StyledNavigationList, StyledNavigationItem } from 'baseui/header-navigation';
 import { Button, KIND } from 'baseui/button';
-import { StatefulButtonGroup, MODE } from 'baseui/button-group';
 import { SnackbarProvider, PLACEMENT } from 'baseui/snackbar';
 import { Layer } from 'baseui/layer';
 import Browser from './Routes/Browser';
@@ -17,9 +16,22 @@ import './App.css';
 const App = (props) => {
   const [ackPwa, setAckPwa] = React.useState(localStorage.getItem('ack.pwa'));
   const drawer = React.useRef(null);
+  const location = useLocation();
+
+  const browseBase = `${process.env.PUBLIC_URL}/browse`;
+  const collectionBase = `${process.env.PUBLIC_URL}/collection`;
+  const browseActive = location.pathname === `${process.env.PUBLIC_URL}` ||
+    location.pathname === `${process.env.PUBLIC_URL}/` ||
+    location.pathname.startsWith(browseBase);
+  const collectionActive = location.pathname.startsWith(collectionBase);
 
   const isStandalone = () => {
-    return (window.matchMedia('(display-mode: standalone)').matches) || ackPwa;
+    const matchMediaResult = typeof window.matchMedia === 'function'
+      ? window.matchMedia('(display-mode: standalone)')
+      : null;
+    const standaloneMatch = Boolean(matchMediaResult && matchMediaResult.matches);
+
+    return standaloneMatch || ackPwa;
   }
 
   const acknowledgeStandaloneWarning = () => {
@@ -79,29 +91,19 @@ const App = (props) => {
                 </StyledNavigationList>
               </HeaderNavigation>
               <div className="menuBar">
-                <StatefulButtonGroup
-                  mode={MODE.radio}
-                  initialState={{ selected: 0 }}>
+                <div style={{ display: 'flex' }}>
                   <NavLink
-                    to={`${process.env.PUBLIC_URL}/browse`}
-                    isActive={(match, location) => {
-                      if (match || ('/LoboReader' === location.pathname || '/LoboReader/' === location.pathname)) {
-                        return true;
-                      }
-                    }}
-                    activeClassName="menuActive">
+                    to={browseBase}
+                    className={browseActive ? 'menuActive' : undefined}>
                     <Button
-                      kind={KIND.tertiary}>Browse</Button>
+                      kind={browseActive ? KIND.secondary : KIND.tertiary}>Browse</Button>
                   </NavLink>
                   <NavLink
-                    to={`${process.env.PUBLIC_URL}/collection`}
-                    isActive={(match, location) => {
-                      return match;
-                    }}
-                    activeClassName="menuActive">
-                    <Button kind={KIND.tertiary}>Collection</Button>
+                    to={collectionBase}
+                    className={collectionActive ? 'menuActive' : undefined}>
+                    <Button kind={collectionActive ? KIND.secondary : KIND.tertiary}>Collection</Button>
                   </NavLink>
-                </StatefulButtonGroup>
+                </div>
               </div>
             </div>
           </Layer>

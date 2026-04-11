@@ -36,9 +36,9 @@ const ItemDrawer = forwardRef((props, ref) => {
     let buttons = [];
     for (let i = 0; i < props.buttonCount; i++) {
       buttons.push(
-        <div style={{ 'marginBottom': '16px' }}>
+        <div key={i} style={{ marginBottom: '16px' }}>
           <Button
-            disabled={(props.buttonDisabled == undefined) ? false : props.buttonDisabled(i, identifier, title)}
+            disabled={props.buttonDisabled === undefined ? false : props.buttonDisabled(i, identifier, title)}
             onClick={() => props.buttonAction(i, identifier, title)}>
             {props.buttonLabel(i, identifier, title)}
           </Button>
@@ -49,11 +49,11 @@ const ItemDrawer = forwardRef((props, ref) => {
   }
 
   const getTitle = () => {
-    return (title != undefined ? title : '');
+    return (title !== undefined ? title : '');
   }
 
   const getImgUrl = () => {
-    return (identifier != undefined ? 'https://archive.org/services/img/' + identifier : '');
+    return (identifier !== undefined ? 'https://archive.org/services/img/' + identifier : '');
   }
 
   return (
@@ -61,7 +61,29 @@ const ItemDrawer = forwardRef((props, ref) => {
       isOpen={drawerOpen}
       onClose={() => setDrawerOpen(false)}
       anchor={ANCHOR.bottom}
-      size={SIZE.auto}>
+      size={SIZE.auto}
+      overrides={{
+        Root: {
+          style: {
+            zIndex: 2000
+          }
+        },
+        Backdrop: {
+          style: {
+            zIndex: 2000
+          }
+        },
+        DrawerContainer: {
+          style: {
+            zIndex: 2001
+          }
+        },
+        Close: {
+          style: {
+            zIndex: 2002
+          }
+        }
+      }}>
       <div style={{ textAlign: 'center' }}>
         <div style={{ fontSize: '130%', fontWeight: '550' }}>{getTitle()}</div>
         <br />
@@ -72,6 +94,7 @@ const ItemDrawer = forwardRef((props, ref) => {
           }}>
             <img
               src={getImgUrl()}
+              alt=""
               style={{
                 maxHeight: '175px',
                 borderRadius: '5px',

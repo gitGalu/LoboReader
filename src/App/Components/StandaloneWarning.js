@@ -14,9 +14,13 @@ import {
 const StandaloneWarning = ((props) => {
     const [dismissVisible, setDismissVisible] = React.useState(false);
 
-    setTimeout(() => {
-        setDismissVisible(true);
-    }, 5000);
+    React.useEffect(() => {
+        const timer = setTimeout(() => {
+            setDismissVisible(true);
+        }, 5000);
+
+        return () => clearTimeout(timer);
+    }, []);
 
     const handleButtonClick = () => {
         setDismissVisible(false);

@@ -11,7 +11,6 @@ import {
     SIZE
 } from 'baseui/modal';
 import { StyledLink } from "baseui/link";
-import { Link } from 'react-router-dom';
 import db from '../Components/Db';
 
 const About = forwardRef((props, ref) => {
@@ -52,7 +51,7 @@ const About = forwardRef((props, ref) => {
     }
 
     useEffect(() => {
-        if (csvLinkEl.current != undefined) {
+        if (csvLinkEl.current !== undefined) {
             setTimeout(() => {
                 csvLinkEl.current.link.click();
             });
@@ -78,8 +77,8 @@ const About = forwardRef((props, ref) => {
                 For changelog, docs &amp; licensing please visit project page on GitHub.
             </ModalBody>
             <ModalFooter style={{paddingBottom: '24px'}}>
-                <a href="mailto:developer@galu.info" target="_blank" style={{paddingRight: '12px'}}><ModalButton kind="primiary">Contact</ModalButton></a>
-                <a href="https://github.com/gitGalu/LoboReader" target="_blank"><ModalButton kind="primiary">Visit GitHub</ModalButton></a>
+                <a href="mailto:developer@galu.info" target="_blank" rel="noreferrer" style={{paddingRight: '12px'}}><ModalButton kind="primiary">Contact</ModalButton></a>
+                <a href="https://github.com/gitGalu/LoboReader" target="_blank" rel="noreferrer"><ModalButton kind="primiary">Visit GitHub</ModalButton></a>
             </ModalFooter>
         </Modal>
     )

@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { useNavigate } from "react-router-dom";
-import { Spinner } from 'baseui/spinner';
 import { Button, KIND, SIZE } from 'baseui/button'
-import { Centered } from '../Components/Centered';
 import db from '../Components/Db';
 import ItemDrawer from '../Components/ItemDrawer';
 import ItemMetadataListItem from '../Components/ItemMetadataListItem';
@@ -72,7 +70,6 @@ const Collection = (props) => {
     };
   }, []);
 
-
   useLayoutEffect(() => {
     if (!gridView) {
       masonryInstance.current?.destroy();
@@ -80,9 +77,10 @@ const Collection = (props) => {
       lastGridView.current = gridView;
       return;
     }
-    if (!masonryContainerRef.current) {
+    if (!masonryContainerRef.current || browserItems.length === 0) {
       return;
     }
+
     const gridChanged = lastGridView.current !== gridView;
     const needsNewInstance = !masonryInstance.current || gridChanged || prevColumnCount.current !== columnCount;
     if (needsNewInstance) {
@@ -97,13 +95,14 @@ const Collection = (props) => {
     } else {
       masonryInstance.current.options.gutter = gutter;
     }
+
     lastGridView.current = gridView;
     prevColumnCount.current = columnCount;
 
     const masonry = masonryInstance.current;
     masonry.reloadItems();
     requestAnimationFrame(() => masonry.layout());
-  }, [browserItems, gridView, gutter, columnWidthValue]);
+  }, [browserItems, columnCount, gridView, gutter, columnWidthValue]);
 
   const reloadDb = () => {
     db.collection
@@ -112,15 +111,20 @@ const Collection = (props) => {
       })
       .toArray()
       .then((items) => {
+        items.sort((a, b) => {
+          const lastOpenedDiff = new Date(b.lastOpenedAt || 0) - new Date(a.lastOpenedAt || 0);
+          if (lastOpenedDiff !== 0) {
+            return lastOpenedDiff;
+          }
+
+          return (a.title || '').localeCompare(b.title || '');
+        });
         setBrowserItems(items)
         setInitial(false)
       });
   }
 
   const handleItemClick = async (event, identifier) => {
-    let item = (browserItems.find(obj => {
-      return obj.id === identifier
-    }));
     navigate(`${process.env.PUBLIC_URL}/read/${identifier}/p/c`);
   }
 
@@ -129,29 +133,16 @@ const Collection = (props) => {
     drawer.current.showDrawer(item, title);
   }
 
-  const findIndex = (identifier) => {
-    let ret = -1;
-    browserItems.forEach((element, index) => {
-      if (element.id === identifier) {
-        ret = index;
-      }
-    })
-    return ret;
-  }
-
   const archiveItem = (identifier) => {
     db.collection.update({ id: identifier }, { archived: true })
-      .then((result) => {
+      .then(() => {
         drawer.current.hideDrawer();
-        let index = findIndex(identifier);
-        browserItems[index].disabled = true;
-        setBrowserItems([]);
-        setBrowserItems(browserItems);
+        setBrowserItems((prev) => prev.filter((item) => item.id !== identifier));
       });
   }
 
   const handleImageLoad = () => {
-    masonryInstance.current?.layout();
+    requestAnimationFrame(() => masonryInstance.current?.layout());
   }
 
   const DataItem = ({ data: { id, title, disabled } }) => (
@@ -165,36 +156,54 @@ const Collection = (props) => {
       onEditClick={(event) => handleEditClick(event, id, title)}
       onSelectItem={(event) => handleItemClick(event, id)}
       onImageLoad={handleImageLoad}
+      showGridTitle={gridView}
     />
   );
 
   const renderData = () => {
     return (
       <div style={{ paddingTop: gridView ? '12px' : '0px', paddingRight: '16px' }}>
-        <div className="masonry-container" ref={masonryContainerRef} key={gridView ? 'grid' : 'list'}>
-          <div className="masonry-sizer" style={{ width: columnWidthValue }} aria-hidden />
-          {browserItems.map((item) => (
-            <div
-              className="masonry-item"
-              key={item.id}
-              style={{ width: columnWidthValue, marginBottom: `${gutter}px` }}
-            >
-              <DataItem data={item} />
-            </div>
-          ))}
-        </div>
+        {gridView ? (
+          <div className="masonry-container" ref={masonryContainerRef} key="grid">
+            <div className="masonry-sizer" style={{ width: columnWidthValue }} aria-hidden />
+            {browserItems.map((item) => (
+              <div
+                className="masonry-item"
+                key={item.id}
+                style={{ width: columnWidthValue, marginBottom: `${gutter}px` }}
+              >
+                <DataItem data={item} />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="cover-grid cover-grid--list">
+            {browserItems.map((item) => (
+              <div className="cover-grid__item" key={item.id}>
+                <DataItem data={item} />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     )
   }
 
   const renderEmpty = () => {
     return (
-      <div id="go">
-        {initial
-          ? <Centered><Spinner /></Centered>
-          : <Centered>Your Collection is empty.</Centered>
-        }
-      </div>
+      initial
+        ? (
+          <div className="loadingState" id="go">
+            <span className="loadingSpinner" aria-hidden="true" />
+            <span>Loading...</span>
+          </div>
+        )
+        : (
+          <div className="statusCard" id="go">
+            <div className="statusTitle">Your Collection is empty.</div>
+            <div className="statusText">Save issues from Browse to build a reading list here.</div>
+          </div>
+        )
     );
   }
 
@@ -207,6 +216,8 @@ const Collection = (props) => {
           switch (index) {
             case 0:
               return 'Remove item'
+            default:
+              return ''
           }
         }}
         buttonAction={(index, identifier, title) => {
@@ -214,13 +225,15 @@ const Collection = (props) => {
             case 0:
               archiveItem(identifier);
               break;
+            default:
+              break;
           }
         }}
       />
 
-      <div style={{ fontSize: '85%', paddingTop: '0px', paddingBottom: '32px', color: '#cbcbcb' }}>
-        <div style={{ float: 'left', paddingTop: '6px' }}>Your Collection</div>
-        <span style={{ float: 'right', paddingRight: '16px' }}>
+      <div style={{ fontSize: '85%', paddingTop: '0px', paddingBottom: '24px', color: '#cbcbcb', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', paddingRight: '16px' }}>
+        <div style={{ paddingTop: '6px' }}>Your Collection</div>
+        <span>
           <Button
             size={SIZE.mini}
             kind={KIND.tertiary}
@@ -236,7 +249,7 @@ const Collection = (props) => {
                 })
               }
             }}
-          >{gridView ? "Grid View" : "List View"}</Button>
+          >{gridView ? "List View" : "Grid View"}</Button>
         </span>
       </div>
 

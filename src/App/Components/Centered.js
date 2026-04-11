@@ -7,8 +7,5 @@ export const Centered = styled('div', {
     height: '100%',
     marginTop: '32px',
     marginBottom: '24px',
-    marginRight: '24px',
-    height: '100%',
+    marginRight: '24px'
   });
-
-  
