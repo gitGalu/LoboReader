@@ -17,13 +17,15 @@ const App = (props) => {
   const [ackPwa, setAckPwa] = React.useState(localStorage.getItem('ack.pwa'));
   const drawer = React.useRef(null);
   const location = useLocation();
+  const backgroundLocation = location.state?.backgroundLocation;
+  const navigationLocation = backgroundLocation || location;
 
   const browseBase = `${process.env.PUBLIC_URL}/browse`;
   const collectionBase = `${process.env.PUBLIC_URL}/collection`;
-  const browseActive = location.pathname === `${process.env.PUBLIC_URL}` ||
-    location.pathname === `${process.env.PUBLIC_URL}/` ||
-    location.pathname.startsWith(browseBase);
-  const collectionActive = location.pathname.startsWith(collectionBase);
+  const browseActive = navigationLocation.pathname === `${process.env.PUBLIC_URL}` ||
+    navigationLocation.pathname === `${process.env.PUBLIC_URL}/` ||
+    navigationLocation.pathname.startsWith(browseBase);
+  const collectionActive = navigationLocation.pathname.startsWith(collectionBase);
 
   const isStandalone = () => {
     const matchMediaResult = typeof window.matchMedia === 'function'
@@ -108,9 +110,9 @@ const App = (props) => {
             </div>
           </Layer>
           <div className="container">
-            <Routes>
+            <Routes location={backgroundLocation || location}>
               <Route path={`${process.env.PUBLIC_URL}/`} element={<Browser />} />
-              <Route path={`${process.env.PUBLIC_URL}/browse/s/:searchQuery`} element={<Browser />} key={Date.now()} />
+              <Route path={`${process.env.PUBLIC_URL}/browse/s/:searchQuery`} element={<Browser />} />
               <Route path={`${process.env.PUBLIC_URL}/browse/:id`} element={<Browser />} />
               <Route path={`${process.env.PUBLIC_URL}/browse`} element={<Browser />} />
               <Route path={`${process.env.PUBLIC_URL}/collection`} element={<Collection />} />
@@ -119,6 +121,13 @@ const App = (props) => {
               <Route path={`${process.env.PUBLIC_URL}/read/:id/p/:prevAction/:prevId`} element={<Reader />} />
               <Route path="*" element={<Browser />} />
             </Routes>
+            {backgroundLocation && (
+              <Routes>
+                <Route path={`${process.env.PUBLIC_URL}/read/:id`} element={<Reader />} />
+                <Route path={`${process.env.PUBLIC_URL}/read/:id/p/:prevAction`} element={<Reader />} />
+                <Route path={`${process.env.PUBLIC_URL}/read/:id/p/:prevAction/:prevId`} element={<Reader />} />
+              </Routes>
+            )}
           </div>
         </SnackbarProvider>
       }

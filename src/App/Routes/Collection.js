@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect } from 'react';
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Button, KIND, SIZE } from 'baseui/button'
 import db from '../Components/Db';
 import ItemDrawer from '../Components/ItemDrawer';
@@ -14,6 +14,7 @@ const Collection = (props) => {
   );
   const [viewportWidth, setViewportWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
   const navigate = useNavigate();
+  const location = useLocation();
   const drawer = React.useRef(null);
   const masonryContainerRef = React.useRef(null);
   const masonryInstance = React.useRef(null);
@@ -125,7 +126,7 @@ const Collection = (props) => {
   }
 
   const handleItemClick = async (event, identifier) => {
-    navigate(`${process.env.PUBLIC_URL}/read/${identifier}/p/c`);
+    navigate(`${process.env.PUBLIC_URL}/read/${identifier}/p/c`, { state: { backgroundLocation: location } });
   }
 
   const handleEditClick = (event, item, title) => {
@@ -145,9 +146,8 @@ const Collection = (props) => {
     requestAnimationFrame(() => masonryInstance.current?.layout());
   }
 
-  const DataItem = ({ data: { id, title, disabled } }) => (
+  const renderDataItem = ({ id, title, disabled }) => (
     <ItemMetadataListItem
-      key={id}
       title={title}
       identifier={id}
       mediatype="text"
@@ -172,7 +172,7 @@ const Collection = (props) => {
                 key={item.id}
                 style={{ width: columnWidthValue, marginBottom: `${gutter}px` }}
               >
-                <DataItem data={item} />
+                {renderDataItem(item)}
               </div>
             ))}
           </div>
@@ -180,7 +180,7 @@ const Collection = (props) => {
           <div className="cover-grid cover-grid--list">
             {browserItems.map((item) => (
               <div className="cover-grid__item" key={item.id}>
-                <DataItem data={item} />
+                {renderDataItem(item)}
               </div>
             ))}
           </div>

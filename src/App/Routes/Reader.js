@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { Button, KIND, SIZE as BUTTON_SIZE } from 'baseui/button';
 import { Slider } from 'baseui/slider';
 import { Spinner } from 'baseui/spinner';
@@ -18,9 +18,11 @@ function Reader(props) {
   const [jumpValue, setJumpValue] = useState("1");
   const [jumpStartPage, setJumpStartPage] = useState(0);
   const [readerControlsVisible, setReaderControlsVisible] = useState(true);
+  const location = useLocation();
   const navigate = useNavigate();
   const pswpRef = useRef(null);
   const lastPreviewedPageRef = useRef(null);
+  const closeHandledRef = useRef(false);
 
   let { id, prevAction, prevId } = useParams();
 
@@ -51,8 +53,15 @@ function Reader(props) {
   }, [id]);
 
   const close = useCallback(() => {
+    if (closeHandledRef.current) {
+      return;
+    }
+
+    closeHandledRef.current = true;
     setTimeout(() => {
-      if (prevAction !== undefined && prevId !== undefined) {
+      if (location.state?.backgroundLocation) {
+        navigate(-1);
+      } else if (prevAction !== undefined && prevId !== undefined) {
         if (prevAction === "s") {
           navigate(`${process.env.PUBLIC_URL}/browse/s/${prevId}`);
         } else {
@@ -64,7 +73,7 @@ function Reader(props) {
         navigate(`${process.env.PUBLIC_URL}/browse`);
       }
     }, 250);
-  }, [navigate, prevAction, prevId]);
+  }, [location.state, navigate, prevAction, prevId]);
 
   const updateIndex = useCallback(async (pageNum, currentItem) => {
     if (!currentItem) {
@@ -286,6 +295,7 @@ function Reader(props) {
     let cancelled = false;
 
     const loadReader = async () => {
+      closeHandledRef.current = false;
       setOpen(false);
       setError(false);
 
@@ -340,6 +350,7 @@ function Reader(props) {
     return () => {
       cancelled = true;
       if (pswpRef.current) {
+        closeHandledRef.current = true;
         pswpRef.current.destroy();
         pswpRef.current = null;
       }

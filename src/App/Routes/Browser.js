@@ -312,7 +312,8 @@ const Browser = (props) => {
 
   const startReading = (identifier, title) => {
     addToCollection(identifier, title);
-    navigate(getLink(identifier));
+    drawer.current?.hideDrawer();
+    navigate(getLink(identifier), { state: { backgroundLocation: location } });
   }
 
   const readLater = (identifier, title) => {
