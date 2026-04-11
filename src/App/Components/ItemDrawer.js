@@ -8,6 +8,14 @@ const ItemDrawer = forwardRef((props, ref) => {
   const [identifier, setIdentifier] = useState("");
   const [title, setTitle] = useState(undefined);
   const [additionalProps, setAdditionalProps] = useState(undefined);
+  const drawerButtonOverrides = {
+    Root: {
+      style: ({ $isFocusVisible }) => ({
+        boxShadow: $isFocusVisible ? '0 0 0 3px rgba(0, 0, 0, 0.16)' : undefined,
+        outline: 'none'
+      })
+    }
+  };
 
   useImperativeHandle(ref, () => {
     return {
@@ -39,7 +47,8 @@ const ItemDrawer = forwardRef((props, ref) => {
         <div key={i} style={{ marginBottom: '16px' }}>
           <Button
             disabled={props.buttonDisabled === undefined ? false : props.buttonDisabled(i, identifier, title)}
-            onClick={() => props.buttonAction(i, identifier, title)}>
+            onClick={() => props.buttonAction(i, identifier, title)}
+            overrides={drawerButtonOverrides}>
             {props.buttonLabel(i, identifier, title)}
           </Button>
         </div>
