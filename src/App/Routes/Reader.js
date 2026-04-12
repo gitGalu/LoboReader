@@ -31,14 +31,21 @@ function Reader(props) {
 
   let { id, prevAction, prevId } = useParams();
 
+  const setReaderViewportActive = useCallback((active) => {
+    document.documentElement.classList.toggle('readerActive', active);
+    document.body.classList.toggle('readerActive', active);
+  }, []);
+
   useLayoutEffect(() => {
     showReaderLaunchOverlay();
+    setReaderViewportActive(true);
     setPwaChromeColor('#000000');
     return () => {
+      setReaderViewportActive(false);
       hideReaderLaunchOverlay();
       resetPwaChromeColor();
     };
-  }, []);
+  }, [setReaderViewportActive]);
 
   const notifyReaderReady = useCallback(() => {
     hideReaderLaunchOverlay();
@@ -211,6 +218,7 @@ function Reader(props) {
     });
 
     pswp.on('close', () => {
+      setReaderViewportActive(false);
       close();
     });
 
@@ -220,7 +228,7 @@ function Reader(props) {
 
     pswp.init();
     window.setTimeout(notifyReaderReady, 1000);
-  }, [close, notifyReaderReady, updateIndex]);
+  }, [close, notifyReaderReady, setReaderViewportActive, updateIndex]);
 
   const renderJumpControls = () => {
     if (!open || readerState.pageCount <= 0) {

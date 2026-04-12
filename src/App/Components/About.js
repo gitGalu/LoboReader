@@ -12,6 +12,9 @@ import {
 } from 'baseui/modal';
 import { StyledLink } from "baseui/link";
 import db from '../Components/Db';
+import { resetPwaChromeColor, setPwaChromeColor } from '../Components/PwaChrome';
+
+const ABOUT_SAFE_AREA_COLOR = '#8f8f8f';
 
 const About = forwardRef((props, ref) => {
     const [drawerOpen, setDrawerOpen] = useState(false);
@@ -27,11 +30,13 @@ const About = forwardRef((props, ref) => {
     });
 
     const showDrawer = (identifier, title) => {
+        setPwaChromeColor(ABOUT_SAFE_AREA_COLOR);
         setDrawerOpen(true);
     };
 
     const hideDrawer = () => {
         setDrawerOpen(false);
+        resetPwaChromeColor();
     };
 
     const headers = [
@@ -57,6 +62,12 @@ const About = forwardRef((props, ref) => {
             });
         }
     }, [data]);
+
+    useEffect(() => {
+        return () => {
+            resetPwaChromeColor();
+        };
+    }, []);
 
     return (
         <Modal
