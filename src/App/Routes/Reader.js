@@ -60,7 +60,7 @@ function Reader(props) {
 
   const getImageItems = useCallback((bookMetadata) => {
     const pageCount = bookMetadata?.items?.length ?? 0;
-    const imageOptions = '_h2000';
+    const imageOptions = '_h2400';
 
     return Array.from({ length: pageCount }, (_, index) => ({
       src: `https://archive.org/download/${id}/page/leaf${index}${imageOptions}.jpg`,
