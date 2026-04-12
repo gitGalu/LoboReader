@@ -7,7 +7,12 @@ import { Centered } from '../Components/Centered';
 import PhotoSwipe from 'photoswipe';
 import InternetArchive from '../Components/InternetArchive';
 import db from '../Components/Db';
-import { resetPwaChromeColor, setPwaChromeColor } from '../Components/PwaChrome';
+import {
+  hideReaderLaunchOverlay,
+  resetPwaChromeColor,
+  setPwaChromeColor,
+  showReaderLaunchOverlay
+} from '../Components/PwaChrome';
 import 'photoswipe/style.css';
 
 function Reader(props) {
@@ -27,8 +32,16 @@ function Reader(props) {
   let { id, prevAction, prevId } = useParams();
 
   useLayoutEffect(() => {
+    showReaderLaunchOverlay();
     setPwaChromeColor('#000000');
-    return resetPwaChromeColor;
+    return () => {
+      hideReaderLaunchOverlay();
+      resetPwaChromeColor();
+    };
+  }, []);
+
+  const notifyReaderReady = useCallback(() => {
+    hideReaderLaunchOverlay();
   }, []);
 
   const getManifestTitle = useCallback((bookMetadata) => {
@@ -201,8 +214,13 @@ function Reader(props) {
       close();
     });
 
+    pswp.on('openingAnimationEnd', () => {
+      notifyReaderReady();
+    });
+
     pswp.init();
-  }, [close, updateIndex]);
+    window.setTimeout(notifyReaderReady, 1000);
+  }, [close, notifyReaderReady, updateIndex]);
 
   const renderJumpControls = () => {
     if (!open || readerState.pageCount <= 0) {
@@ -296,14 +314,6 @@ function Reader(props) {
     return createPortal(controls, document.body);
   }
 
-  const renderReaderLoadingOverlay = () => createPortal(
-    <div className="readerLaunchOverlay">
-      <span className="loadingSpinner" aria-hidden="true" />
-      <span>Loading...</span>
-    </div>,
-    document.body
-  );
-
   useEffect(() => {
     let cancelled = false;
 
@@ -354,6 +364,7 @@ function Reader(props) {
       } catch (err) {
         if (!cancelled) {
           setError(true);
+          notifyReaderReady();
         }
       }
     };
@@ -368,7 +379,7 @@ function Reader(props) {
         pswpRef.current = null;
       }
     };
-  }, [getImageItems, getManifestTitle, id, initPhotoSwipe]);
+  }, [getImageItems, getManifestTitle, id, initPhotoSwipe, notifyReaderReady]);
 
   return (
     <div>
@@ -376,9 +387,7 @@ function Reader(props) {
         error ? (<div className="page"><Centered>Error loading data from the Internet Archive.</Centered></div>) :
           !open
             ?
-            (<div>
-              {renderReaderLoadingOverlay()}
-            </div>)
+            null
             :
             (<div>
               {renderJumpControls()}

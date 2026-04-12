@@ -1,4 +1,6 @@
 const DEFAULT_CHROME_COLOR = '#ffffff';
+export const READER_LAUNCH_START_EVENT = 'loboreader:reader-launch-start';
+export const READER_READY_EVENT = 'loboreader:reader-ready';
 
 const setSafeAreaBackdrop = (color, visible) => {
   document.documentElement.style.setProperty('--pwa-safe-area-background', color);
@@ -31,4 +33,20 @@ export const setPwaChromeColor = (color = DEFAULT_CHROME_COLOR) => {
 export const resetPwaChromeColor = () => {
   getThemeColorMeta().setAttribute('content', DEFAULT_CHROME_COLOR);
   setSafeAreaBackdrop(DEFAULT_CHROME_COLOR, false);
+};
+
+export const showReaderLaunchOverlay = () => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.dispatchEvent(new Event(READER_LAUNCH_START_EVENT));
+};
+
+export const hideReaderLaunchOverlay = () => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.dispatchEvent(new Event(READER_READY_EVENT));
 };

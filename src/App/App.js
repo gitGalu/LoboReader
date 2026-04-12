@@ -11,11 +11,12 @@ import Collection from './Routes/Collection';
 import Reader from './Routes/Reader';
 import About from './Components/About';
 import StandaloneWarning from './Components/StandaloneWarning';
-import { resetPwaChromeColor } from './Components/PwaChrome';
+import { READER_LAUNCH_START_EVENT, READER_READY_EVENT, resetPwaChromeColor } from './Components/PwaChrome';
 import './App.css';
 
 const App = (props) => {
   const [ackPwa, setAckPwa] = React.useState(localStorage.getItem('ack.pwa'));
+  const [readerLaunchVisible, setReaderLaunchVisible] = React.useState(false);
   const drawer = React.useRef(null);
   const location = useLocation();
   const backgroundLocation = location.state?.backgroundLocation;
@@ -63,6 +64,19 @@ const App = (props) => {
 
   React.useEffect(() => {
     resetPwaChromeColor();
+  }, []);
+
+  React.useEffect(() => {
+    const showReaderLaunchOverlay = () => setReaderLaunchVisible(true);
+    const hideReaderLaunchOverlay = () => setReaderLaunchVisible(false);
+
+    window.addEventListener(READER_LAUNCH_START_EVENT, showReaderLaunchOverlay);
+    window.addEventListener(READER_READY_EVENT, hideReaderLaunchOverlay);
+
+    return () => {
+      window.removeEventListener(READER_LAUNCH_START_EVENT, showReaderLaunchOverlay);
+      window.removeEventListener(READER_READY_EVENT, hideReaderLaunchOverlay);
+    };
   }, []);
 
   return (
@@ -157,6 +171,12 @@ const App = (props) => {
               </Routes>
             )}
           </div>
+          {readerLaunchVisible && (
+            <div className="readerLaunchOverlay">
+              <span className="loadingSpinner" aria-hidden="true" />
+              <span>Loading...</span>
+            </div>
+          )}
         </SnackbarProvider>
       }
     </BaseProvider>

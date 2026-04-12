@@ -1,17 +1,15 @@
 import React, { useState, useEffect, useLayoutEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button, KIND, SIZE } from 'baseui/button'
 import db from '../Components/Db';
 import ItemDrawer from '../Components/ItemDrawer';
 import ItemMetadataListItem from '../Components/ItemMetadataListItem';
-import { setPwaChromeColor } from '../Components/PwaChrome';
+import { setPwaChromeColor, showReaderLaunchOverlay } from '../Components/PwaChrome';
 import Masonry from 'masonry-layout';
 
 const Collection = (props) => {
   const [browserItems, setBrowserItems] = useState([]);
   const [initial, setInitial] = useState(true);
-  const [readerLaunching, setReaderLaunching] = useState(false);
   const [gridView, setGridView] = useState(
     JSON.parse(localStorage.getItem('collection.gridView')) || false
   );
@@ -129,8 +127,7 @@ const Collection = (props) => {
   }
 
   const handleItemClick = async (event, identifier) => {
-    setReaderLaunching(true);
-    window.setTimeout(() => setReaderLaunching(false), 250);
+    showReaderLaunchOverlay();
     setPwaChromeColor('#000000');
     navigate(`${process.env.PUBLIC_URL}/read/${identifier}/p/c`, { state: { backgroundLocation: location } });
   }
@@ -265,13 +262,6 @@ const Collection = (props) => {
         :
         renderEmpty()
       }
-      {readerLaunching && createPortal(
-        <div className="readerLaunchOverlay">
-          <span className="loadingSpinner" aria-hidden="true" />
-          <span>Loading...</span>
-        </div>,
-        document.body
-      )}
     </div>
   )
 }

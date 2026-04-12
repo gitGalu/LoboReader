@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { createPortal } from 'react-dom';
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { Button, KIND } from 'baseui/button';
 import { TriangleDown } from 'baseui/icon';
@@ -11,7 +10,7 @@ import db from '../Components/Db';
 import SearchBox from '../Components/SearchBox';
 import ItemMetadataListItem from '../Components/ItemMetadataListItem'
 import ItemDrawer from '../Components/ItemDrawer';
-import { setPwaChromeColor } from '../Components/PwaChrome';
+import { setPwaChromeColor, showReaderLaunchOverlay } from '../Components/PwaChrome';
 import Masonry from 'masonry-layout';
 import { isMobile, isIPad13, isTablet } from 'react-device-detect';
 
@@ -23,7 +22,6 @@ const Browser = (props) => {
   const [initial, setInitial] = useState(true);
   const [error, setError] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [readerLaunching, setReaderLaunching] = useState(false);
   const [autoPagingReady, setAutoPagingReady] = useState(false);
   const [userHasScrolled, setUserHasScrolled] = useState(false);
   const [loadedCoverCount, setLoadedCoverCount] = useState(0);
@@ -314,8 +312,7 @@ const Browser = (props) => {
   }
 
   const startReading = (identifier, title) => {
-    setReaderLaunching(true);
-    window.setTimeout(() => setReaderLaunching(false), 250);
+    showReaderLaunchOverlay();
     addToCollection(identifier, title);
     drawer.current?.hideDrawer();
     setPwaChromeColor('#000000');
@@ -597,13 +594,6 @@ const Browser = (props) => {
               (error ? renderError() : renderEmpty())
         }
       </div>
-      {readerLaunching && createPortal(
-        <div className="readerLaunchOverlay">
-          <span className="loadingSpinner" aria-hidden="true" />
-          <span>Loading...</span>
-        </div>,
-        document.body
-      )}
     </div>
   );
 }

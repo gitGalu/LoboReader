@@ -457,7 +457,7 @@ ul {
   inset: 0;
   justify-content: center;
   position: fixed;
-  z-index: 100400;
+  z-index: 100500;
 }
 
 .readerLaunchOverlay .loadingSpinner {
