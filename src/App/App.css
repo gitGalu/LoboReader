@@ -292,8 +292,6 @@ li.textContent {
     --pswp-icon-color: #eeeeee;
     --pswp-icon-color-secondary: #333333;
     --pswp-bg: #000000;
-    height: calc(100% + var(--app-safe-area-top)) !important;
-    top: calc(-1 * var(--app-safe-area-top)) !important;
 }
 
 .pswp__counter {
