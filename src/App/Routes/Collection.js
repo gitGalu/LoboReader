@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button, KIND, SIZE } from 'baseui/button'
 import db from '../Components/Db';
@@ -7,12 +7,59 @@ import ItemMetadataListItem from '../Components/ItemMetadataListItem';
 import { setPwaChromeColor, showReaderLaunchOverlay } from '../Components/PwaChrome';
 import Masonry from 'masonry-layout';
 
+const FILTER_STORAGE_KEY = 'collection.statusFilter';
+
+const FILTER_OPTIONS = [
+  { value: 'all', label: 'All' },
+  { value: 'unread', label: 'Not Started' },
+  { value: 'started', label: 'Reading' }
+];
+
+const getStoredOption = (storageKey, options, fallback) => {
+  const storedValue = localStorage.getItem(storageKey);
+  return options.some((option) => option.value === storedValue) ? storedValue : fallback;
+};
+
+const getTimestamp = (value) => {
+  const timestamp = new Date(value || 0).getTime();
+  return Number.isFinite(timestamp) ? timestamp : 0;
+};
+
+const getReadingStatus = (item) => {
+  if (item.read === true) {
+    return 'completed';
+  }
+
+  return Number(item.page || 0) > 0 ? 'started' : 'unread';
+};
+
+const sortCollectionItems = (items) => {
+  const sortedItems = [...items];
+
+  sortedItems.sort((a, b) => {
+    const recentDiff = getTimestamp(b.lastOpenedAt || b.addedAt) - getTimestamp(a.lastOpenedAt || a.addedAt);
+    if (recentDiff !== 0) {
+      return recentDiff;
+    }
+
+    const addedDiff = getTimestamp(b.addedAt || b.lastOpenedAt) - getTimestamp(a.addedAt || a.lastOpenedAt);
+    if (addedDiff !== 0) {
+      return addedDiff;
+    }
+
+    return (a.title || '').localeCompare(b.title || '', undefined, { sensitivity: 'base' });
+  });
+
+  return sortedItems;
+};
+
 const Collection = (props) => {
   const [browserItems, setBrowserItems] = useState([]);
   const [initial, setInitial] = useState(true);
   const [gridView, setGridView] = useState(
     JSON.parse(localStorage.getItem('collection.gridView')) || false
   );
+  const [statusFilter, setStatusFilter] = useState(() => getStoredOption(FILTER_STORAGE_KEY, FILTER_OPTIONS, 'all'));
   const [viewportWidth, setViewportWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
   const navigate = useNavigate();
   const location = useLocation();
@@ -38,6 +85,39 @@ const Collection = (props) => {
   const columnWidthValue = gridView
     ? `calc((100% - ${(columnCount - 1) * gutter}px)/${columnCount})`
     : '100%';
+  const visibleItems = useMemo(() => {
+    const filteredItems = statusFilter === 'all'
+      ? browserItems
+      : browserItems.filter((item) => getReadingStatus(item) === statusFilter);
+
+    return sortCollectionItems(filteredItems);
+  }, [browserItems, statusFilter]);
+
+  const getToolbarButtonOverrides = (minWidth = '96px') => ({
+    Root: {
+      style: {
+        backgroundColor: 'rgb(246, 246, 246)',
+        borderTopLeftRadius: '0',
+        borderTopRightRadius: '0',
+        borderBottomRightRadius: '0',
+        borderBottomLeftRadius: '0',
+        minWidth,
+        ':hover': {
+          backgroundColor: '#e8e8e8'
+        },
+        ':active': {
+          backgroundColor: '#dcdcdc'
+        },
+        ':focus': {
+          backgroundColor: 'rgb(246, 246, 246)'
+        },
+        ':focus-visible': {
+          backgroundColor: 'rgb(246, 246, 246)',
+          boxShadow: '0 0 0 2px rgba(0, 0, 0, 0.28)'
+        }
+      }
+    }
+  });
 
   useEffect(() => {
     reloadDb();
@@ -79,12 +159,19 @@ const Collection = (props) => {
       lastGridView.current = gridView;
       return;
     }
-    if (!masonryContainerRef.current || browserItems.length === 0) {
+    if (visibleItems.length === 0) {
+      masonryInstance.current?.destroy();
+      masonryInstance.current = null;
+      lastGridView.current = gridView;
+      return;
+    }
+    if (!masonryContainerRef.current) {
       return;
     }
 
     const gridChanged = lastGridView.current !== gridView;
-    const needsNewInstance = !masonryInstance.current || gridChanged || prevColumnCount.current !== columnCount;
+    const containerChanged = masonryInstance.current?.element !== masonryContainerRef.current;
+    const needsNewInstance = !masonryInstance.current || containerChanged || gridChanged || prevColumnCount.current !== columnCount;
     if (needsNewInstance) {
       masonryInstance.current?.destroy();
       masonryInstance.current = new Masonry(masonryContainerRef.current, {
@@ -104,7 +191,7 @@ const Collection = (props) => {
     const masonry = masonryInstance.current;
     masonry.reloadItems();
     requestAnimationFrame(() => masonry.layout());
-  }, [browserItems, columnCount, gridView, gutter, columnWidthValue]);
+  }, [visibleItems, columnCount, gridView, gutter, columnWidthValue]);
 
   const reloadDb = () => {
     db.collection
@@ -113,14 +200,6 @@ const Collection = (props) => {
       })
       .toArray()
       .then((items) => {
-        items.sort((a, b) => {
-          const lastOpenedDiff = new Date(b.lastOpenedAt || 0) - new Date(a.lastOpenedAt || 0);
-          if (lastOpenedDiff !== 0) {
-            return lastOpenedDiff;
-          }
-
-          return (a.title || '').localeCompare(b.title || '');
-        });
         setBrowserItems(items)
         setInitial(false)
       });
@@ -169,7 +248,7 @@ const Collection = (props) => {
         {gridView ? (
           <div className="masonry-container" ref={masonryContainerRef} key="grid">
             <div className="masonry-sizer" style={{ width: columnWidthValue }} aria-hidden />
-            {browserItems.map((item) => (
+            {visibleItems.map((item) => (
               <div
                 className="masonry-item"
                 key={item.id}
@@ -181,7 +260,7 @@ const Collection = (props) => {
           </div>
         ) : (
           <div className="cover-grid cover-grid--list">
-            {browserItems.map((item) => (
+            {visibleItems.map((item) => (
               <div className="cover-grid__item" key={item.id}>
                 {renderDataItem(item)}
               </div>
@@ -202,13 +281,35 @@ const Collection = (props) => {
           </div>
         )
         : (
-          <div className="statusCard" id="go">
-            <div className="statusTitle">Your Collection is empty.</div>
-            <div className="statusText">Save issues from Browse to build a reading list here.</div>
-          </div>
+          browserItems.length === 0
+            ? (
+              <div className="statusCard" id="go">
+                <div className="statusTitle">Your Collection is empty.</div>
+                <div className="statusText">Save issues from Browse to build a reading list here.</div>
+              </div>
+            )
+            : (
+              <div className="statusCard" id="go">
+                <div className="statusTitle">No issues match this filter.</div>
+                <div className="statusText">Change the reading status filter to see more saved issues.</div>
+              </div>
+            )
         )
     );
   }
+
+  const updateStatusFilter = (nextStatusFilter) => {
+    setStatusFilter(nextStatusFilter);
+    localStorage.setItem(FILTER_STORAGE_KEY, nextStatusFilter);
+  };
+
+  const cycleStatusFilter = () => {
+    const currentIndex = FILTER_OPTIONS.findIndex((option) => option.value === statusFilter);
+    const nextOption = FILTER_OPTIONS[(currentIndex + 1) % FILTER_OPTIONS.length] || FILTER_OPTIONS[0];
+    updateStatusFilter(nextOption.value);
+  };
+
+  const statusFilterLabel = FILTER_OPTIONS.find((option) => option.value === statusFilter)?.label || FILTER_OPTIONS[0].label;
 
   return (
     <div className="page">
@@ -234,9 +335,15 @@ const Collection = (props) => {
         }}
       />
 
-      <div style={{ fontSize: '85%', paddingTop: '0px', paddingBottom: '24px', color: '#cbcbcb', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', paddingRight: '16px' }}>
-        <div style={{ paddingTop: '6px' }}>Your Collection</div>
-        <span>
+      <div className="collectionToolbar">
+        <div className="collectionToolbar__title">Your Collection</div>
+        <div className="collectionToolbar__controls">
+          <Button
+            size={SIZE.mini}
+            kind={KIND.tertiary}
+            onClick={cycleStatusFilter}
+            overrides={getToolbarButtonOverrides()}
+          >{statusFilterLabel}</Button>
           <Button
             size={SIZE.mini}
             kind={KIND.tertiary}
@@ -244,19 +351,12 @@ const Collection = (props) => {
               setGridView(!gridView);
               localStorage.setItem('collection.gridView', JSON.stringify(!gridView));
             }}
-            overrides={{
-              Root: {
-                style: ({ $theme }) => ({
-                  backgroundColor: 'rgb(246, 246, 246)',
-                  width: '96px'
-                })
-              }
-            }}
-          >{gridView ? "List View" : "Grid View"}</Button>
-        </span>
+            overrides={getToolbarButtonOverrides()}
+          >{gridView ? "Grid View" : "List View"}</Button>
+        </div>
       </div>
 
-      {(browserItems.length > 0 && !initial)
+      {(visibleItems.length > 0 && !initial)
         ?
         renderData()
         :

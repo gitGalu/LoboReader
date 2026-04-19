@@ -338,6 +338,7 @@ function Reader(props) {
 
         let item = await db.collection.get({ id });
         const fallbackTitle = getManifestTitle(bookMetadata);
+        const now = new Date().toISOString();
 
         if (item === undefined) {
           item = {
@@ -346,14 +347,16 @@ function Reader(props) {
             page: 0,
             read: false,
             archived: false,
-            lastOpenedAt: new Date().toISOString()
+            addedAt: now,
+            lastOpenedAt: now
           };
         } else {
           item = {
             ...item,
             title: item.title || fallbackTitle,
             archived: false,
-            lastOpenedAt: new Date().toISOString()
+            addedAt: item.addedAt || now,
+            lastOpenedAt: now
           };
         }
 

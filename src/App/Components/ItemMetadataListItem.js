@@ -9,10 +9,19 @@ import { Button, KIND, SIZE } from 'baseui/button';
 const ItemMetadataListItem = (props) => {
   let { searchQuery, id, parentIdentifier } = useParams();
   const [imageReady, setImageReady] = React.useState(false);
+  const imageReadyFrames = React.useRef([]);
 
   React.useEffect(() => {
     setImageReady(false);
+    imageReadyFrames.current.forEach((frameId) => cancelAnimationFrame(frameId));
+    imageReadyFrames.current = [];
   }, [props.identifier]);
+
+  React.useEffect(() => {
+    return () => {
+      imageReadyFrames.current.forEach((frameId) => cancelAnimationFrame(frameId));
+    };
+  }, []);
 
   const renderItem = () => {
     switch (props.mediatype) {
@@ -57,9 +66,23 @@ const ItemMetadataListItem = (props) => {
 
   const renderGridElement = () => {
     const showGridTitle = imageReady && (props.mediatype === "collection" || props.showGridTitle);
+    const gridCardClassName = props.inCollection && imageReady ? "gridCard gridCard--inCollection" : "gridCard";
+    const handleImageSettled = () => {
+      props.onImageLoad && props.onImageLoad();
+      imageReadyFrames.current.forEach((frameId) => cancelAnimationFrame(frameId));
+      imageReadyFrames.current = [];
+      const firstFrame = requestAnimationFrame(() => {
+        const secondFrame = requestAnimationFrame(() => {
+          setImageReady(true);
+          imageReadyFrames.current = [];
+        });
+        imageReadyFrames.current = [secondFrame];
+      });
+      imageReadyFrames.current = [firstFrame];
+    };
 
     return (
-      <div className="gridCard">
+      <div className={gridCardClassName}>
         <div className="gridCardMedia">
           <img
             className="gridImg"
@@ -70,12 +93,10 @@ const ItemMetadataListItem = (props) => {
             loading="lazy"
             decoding="async"
             onLoad={() => {
-              setImageReady(true);
-              props.onImageLoad && props.onImageLoad();
+              handleImageSettled();
             }}
             onError={() => {
-              setImageReady(true);
-              props.onImageLoad && props.onImageLoad();
+              handleImageSettled();
             }}
           />
         </div>

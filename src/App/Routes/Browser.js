@@ -25,6 +25,8 @@ const Browser = (props) => {
   const [autoPagingReady, setAutoPagingReady] = useState(false);
   const [userHasScrolled, setUserHasScrolled] = useState(false);
   const [loadedCoverCount, setLoadedCoverCount] = useState(0);
+  const [collectionItemIds, setCollectionItemIds] = useState(() => new Set());
+  const [collectionStatusReady, setCollectionStatusReady] = useState(false);
   const [isSearch, setIsSearch] = useState(false);
   const [parentIdentifier, setParentIdentifier] = useState(undefined);
   const gridView = true;
@@ -52,9 +54,26 @@ const Browser = (props) => {
 
   let { id, searchQuery } = useParams();
 
+  const loadCollectionItemIds = useCallback(async () => {
+    try {
+      const items = await db.collection.toArray();
+      setCollectionItemIds(new Set(
+        items
+          .filter((item) => item.archived === false)
+          .map((item) => item.id)
+      ));
+    } finally {
+      setCollectionStatusReady(true);
+    }
+  }, []);
+
   useEffect(() => {
     browserItemsRef.current = browserItems;
   }, [browserItems]);
+
+  useEffect(() => {
+    loadCollectionItemIds();
+  }, [loadCollectionItemIds]);
 
   const prepareQuery = useCallback(() => {
     if (parentIdentifier === undefined) {
@@ -326,20 +345,28 @@ const Browser = (props) => {
 
   const addToCollection = async (identifier, title) => {
     const dbItem = await db.collection.get({ id: identifier });
+    const now = new Date().toISOString();
     if (dbItem === undefined) {
-      db.collection.add({
+      await db.collection.add({
         id: identifier,
         title: title,
         page: 0,
         read: false,
         archived: false,
-        lastOpenedAt: new Date().toISOString()
+        addedAt: now,
+        lastOpenedAt: now
       }, identifier);
     } else {
       dbItem.archived = false;
-      dbItem.lastOpenedAt = new Date().toISOString();
-      db.collection.put(dbItem);
+      dbItem.addedAt = dbItem.addedAt || now;
+      dbItem.lastOpenedAt = now;
+      await db.collection.put(dbItem);
     }
+    setCollectionItemIds((currentIds) => {
+      const updatedIds = new Set(currentIds);
+      updatedIds.add(identifier);
+      return updatedIds;
+    });
   }
 
   const handleSearch = (input) => {
@@ -419,6 +446,7 @@ const Browser = (props) => {
                 identifier={item.identifier}
                 mediatype={item.mediatype}
                 gridView={gridView}
+                inCollection={item.mediatype !== 'collection' && collectionItemIds.has(item.identifier)}
                 onSelectItem={(e, selectedIdentifier, titleText) => handleItemClick(e, selectedIdentifier, titleText)}
                 onImageLoad={handleImageLoad}
               />
@@ -451,7 +479,7 @@ const Browser = (props) => {
 
   const renderEmpty = () => {
     return (
-      initial
+      initial || !collectionStatusReady
         ? (
           <div className="loadingState">
             <span className="loadingSpinner" aria-hidden="true" />
@@ -587,7 +615,7 @@ const Browser = (props) => {
       </div>
       <div className="routeResults">
         {
-          (browserItems.length > 0 && !initial)
+          (browserItems.length > 0 && !initial && collectionStatusReady)
               ?
               renderData()
               :
