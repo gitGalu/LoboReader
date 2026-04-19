@@ -352,7 +352,7 @@ const Collection = (props) => {
               localStorage.setItem('collection.gridView', JSON.stringify(!gridView));
             }}
             overrides={getToolbarButtonOverrides()}
-          >{gridView ? "Grid View" : "List View"}</Button>
+          >{gridView ? "Covers" : "List View"}</Button>
         </div>
       </div>
 
