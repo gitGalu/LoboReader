@@ -158,17 +158,21 @@ const App = (props) => {
             </div>
           </Layer>
           <div className="container">
-            <Routes location={backgroundLocation || location}>
-              <Route path={`${process.env.PUBLIC_URL}/`} element={<Browser />} />
-              <Route path={`${process.env.PUBLIC_URL}/browse/s/:searchQuery`} element={<Browser />} />
-              <Route path={`${process.env.PUBLIC_URL}/browse/:id`} element={<Browser />} />
-              <Route path={`${process.env.PUBLIC_URL}/browse`} element={<Browser />} />
-              <Route path={`${process.env.PUBLIC_URL}/collection`} element={<Collection />} />
-              <Route path={`${process.env.PUBLIC_URL}/read/:id`} element={<Reader />} />
-              <Route path={`${process.env.PUBLIC_URL}/read/:id/p/:prevAction`} element={<Reader />} />
-              <Route path={`${process.env.PUBLIC_URL}/read/:id/p/:prevAction/:prevId`} element={<Reader />} />
-              <Route path="*" element={<Browser />} />
-            </Routes>
+            {/* With a reader open on top (backgroundLocation), this is the
+                screen it was opened from; see .backgroundRoute in App.css. */}
+            <div className={backgroundLocation ? 'backgroundRoute' : undefined}>
+              <Routes location={backgroundLocation || location}>
+                <Route path={`${process.env.PUBLIC_URL}/`} element={<Browser />} />
+                <Route path={`${process.env.PUBLIC_URL}/browse/s/:searchQuery`} element={<Browser />} />
+                <Route path={`${process.env.PUBLIC_URL}/browse/:id`} element={<Browser />} />
+                <Route path={`${process.env.PUBLIC_URL}/browse`} element={<Browser />} />
+                <Route path={`${process.env.PUBLIC_URL}/collection`} element={<Collection />} />
+                <Route path={`${process.env.PUBLIC_URL}/read/:id`} element={<Reader />} />
+                <Route path={`${process.env.PUBLIC_URL}/read/:id/p/:prevAction`} element={<Reader />} />
+                <Route path={`${process.env.PUBLIC_URL}/read/:id/p/:prevAction/:prevId`} element={<Reader />} />
+                <Route path="*" element={<Browser />} />
+              </Routes>
+            </div>
             {backgroundLocation && (
               <Routes>
                 <Route path={`${process.env.PUBLIC_URL}/read/:id`} element={<Reader />} />

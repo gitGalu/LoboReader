@@ -135,6 +135,28 @@ body.readerActive.pwaChromeActive::after {
   -webkit-backdrop-filter: blur(6px);
 }
 
+/*
+ * The reader opens on top of the still-mounted main screen. iOS tints the
+ * status bar from a fixed bar along the top edge, and it doesn't count
+ * full-screen layers (PhotoSwipe, the page overview) as one, so it would
+ * pick up this white header from underneath. Hidden, not removed: it comes
+ * back as soon as the reader starts closing.
+ */
+html.readerActive .anchored-top {
+  visibility: hidden;
+}
+
+/*
+ * Same for the screen itself. When the on-screen keyboard is up, iOS can
+ * reveal what's below the reader's layers (between the search field and the
+ * keyboard, and through the keyboard's translucent glass), so there must be
+ * nothing there but the black page background. Hidden elements don't take
+ * taps either, so nothing below can be opened by accident.
+ */
+html.readerActive .backgroundRoute {
+  visibility: hidden;
+}
+
 .page {
   padding-top: calc(112px + var(--app-safe-area-top));
 }
