@@ -647,6 +647,22 @@ ul {
   z-index: 100500;
 }
 
+.readerLaunchSlow {
+  align-items: center;
+  animation: readerFadeUp 0.22s ease-out;
+  color: #8c8c8c;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .readerLaunchSlow {
+    animation: none;
+  }
+}
+
 .readerLaunchOverlay .loadingSpinner {
   border-color: #333333;
   border-top-color: #f2f2f2;

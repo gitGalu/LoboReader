@@ -11,6 +11,7 @@ import PageThumbnailGrid from '../Components/PageThumbnailGrid';
 import readerTheme from '../Components/readerTheme';
 import db from '../Components/Db';
 import {
+  READER_LAUNCH_CANCEL_EVENT,
   hideReaderLaunchOverlay,
   resetPwaChromeColor,
   setPwaChromeColor,
@@ -125,6 +126,15 @@ function Reader(props) {
       }
     }, 250);
   }, [navigate, prevAction, prevId]);
+
+  // "Go back" on a launch that's taking too long: leave the way × would.
+  // close() also marks the launch as handled, so a manifest that arrives late
+  // doesn't open the reader after all (see loadReader).
+  useEffect(() => {
+    const handleCancel = () => close();
+    window.addEventListener(READER_LAUNCH_CANCEL_EVENT, handleCancel);
+    return () => window.removeEventListener(READER_LAUNCH_CANCEL_EVENT, handleCancel);
+  }, [close]);
 
   const updateIndex = useCallback(async (pageNum, currentItem) => {
     if (!currentItem) {
@@ -360,7 +370,7 @@ function Reader(props) {
 
       try {
         const bookMetadata = await InternetArchive.BookManifestAPI.get({ identifier: id });
-        if (cancelled) {
+        if (cancelled || closeHandledRef.current) {
           return;
         }
 
@@ -389,7 +399,7 @@ function Reader(props) {
         }
 
         await db.collection.put(item, id);
-        if (cancelled) {
+        if (cancelled || closeHandledRef.current) {
           return;
         }
 
@@ -402,7 +412,7 @@ function Reader(props) {
         setOpen(true);
         initPhotoSwipe(pages, item);
       } catch (err) {
-        if (!cancelled) {
+        if (!cancelled && !closeHandledRef.current) {
           setError(true);
           notifyReaderReady();
         }

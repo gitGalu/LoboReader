@@ -1,6 +1,7 @@
 const DEFAULT_CHROME_COLOR = '#ffffff';
 export const READER_LAUNCH_START_EVENT = 'loboreader:reader-launch-start';
 export const READER_READY_EVENT = 'loboreader:reader-ready';
+export const READER_LAUNCH_CANCEL_EVENT = 'loboreader:reader-launch-cancel';
 
 const setSafeAreaBackdrop = (color, visible) => {
   document.documentElement.style.setProperty('--pwa-safe-area-background', color);
@@ -49,4 +50,13 @@ export const hideReaderLaunchOverlay = () => {
   }
 
   window.dispatchEvent(new Event(READER_READY_EVENT));
+};
+
+// The user gave up waiting for the reader to open (see ReaderLaunchOverlay).
+export const cancelReaderLaunch = () => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.dispatchEvent(new Event(READER_LAUNCH_CANCEL_EVENT));
 };

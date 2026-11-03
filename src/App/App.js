@@ -11,7 +11,13 @@ import Collection from './Routes/Collection';
 import Reader from './Routes/Reader';
 import About from './Components/About';
 import StandaloneWarning from './Components/StandaloneWarning';
-import { READER_LAUNCH_START_EVENT, READER_READY_EVENT, resetPwaChromeColor } from './Components/PwaChrome';
+import {
+  READER_LAUNCH_START_EVENT,
+  READER_READY_EVENT,
+  cancelReaderLaunch,
+  resetPwaChromeColor
+} from './Components/PwaChrome';
+import ReaderLaunchOverlay from './Components/ReaderLaunchOverlay';
 import './App.css';
 
 const App = (props) => {
@@ -172,10 +178,14 @@ const App = (props) => {
             )}
           </div>
           {readerLaunchVisible && (
-            <div className="readerLaunchOverlay">
-              <span className="loadingSpinner" aria-hidden="true" />
-              <span>Loading...</span>
-            </div>
+            <ReaderLaunchOverlay
+              onCancel={() => {
+                // The reader (if it got as far as mounting) navigates back;
+                // either way the overlay must go.
+                cancelReaderLaunch();
+                setReaderLaunchVisible(false);
+              }}
+            />
           )}
         </SnackbarProvider>
       }
