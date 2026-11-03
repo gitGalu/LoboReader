@@ -2,3 +2,9 @@
 node_modules/
 build/
 
+
+# Local HTTPS dev certificates and environment overrides
+.env
+.env.local
+certs/
+*.pem

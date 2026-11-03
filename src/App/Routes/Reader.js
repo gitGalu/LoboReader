@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
-import { Button, KIND, SIZE as BUTTON_SIZE } from 'baseui/button';
-import { Slider } from 'baseui/slider';
+import { ThemeProvider } from 'baseui';
+import { Button, KIND, SHAPE, SIZE } from 'baseui/button';
+import { ArrowLeft, Delete as CloseIcon } from 'baseui/icon';
 import { Centered } from '../Components/Centered';
 import PhotoSwipe from 'photoswipe';
 import InternetArchive from '../Components/InternetArchive';
+import PageThumbnailGrid from '../Components/PageThumbnailGrid';
+import readerTheme from '../Components/readerTheme';
 import db from '../Components/Db';
 import {
   hideReaderLaunchOverlay,
@@ -15,19 +18,42 @@ import {
 } from '../Components/PwaChrome';
 import 'photoswipe/style.css';
 
+// Base Web has no grid icon; this one sits in the page chip's startEnhancer.
+const PagesIcon = () => (
+  <svg viewBox="0 0 20 20" width="12" height="12" fill="currentColor" aria-hidden="true">
+    <rect x="2" y="2" width="6.5" height="6.5" rx="1.5" />
+    <rect x="11.5" y="2" width="6.5" height="6.5" rx="1.5" />
+    <rect x="2" y="11.5" width="6.5" height="6.5" rx="1.5" />
+    <rect x="11.5" y="11.5" width="6.5" height="6.5" rx="1.5" />
+  </svg>
+);
+
+// Keeps taps on reader controls from reaching PhotoSwipe (which would toggle
+// the controls or start a swipe).
+const stopPropagation = (event) => event.stopPropagation();
+
 function Reader(props) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState(false);
   const [readerState, setReaderState] = useState({ page: 0, pageCount: 0 });
-  const [jumpOpen, setJumpOpen] = useState(false);
-  const [jumpValue, setJumpValue] = useState("1");
-  const [jumpStartPage, setJumpStartPage] = useState(0);
   const [readerControlsVisible, setReaderControlsVisible] = useState(true);
+  const [thumbnailsOpen, setThumbnailsOpen] = useState(false);
+  const [thumbnailsMounted, setThumbnailsMounted] = useState(false);
+  const [returnPage, setReturnPage] = useState(null);
+  const [pageItems, setPageItems] = useState([]);
+  const [returnPillVisible, setReturnPillVisible] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const pswpRef = useRef(null);
-  const lastPreviewedPageRef = useRef(null);
   const closeHandledRef = useRef(false);
+  const backgroundLocationRef = useRef(location.state?.backgroundLocation);
+  const pagesHistoryTokenRef = useRef(null);
+  const returnPillTimerRef = useRef(null);
+
+  // Read through a ref so `close` (and with it PhotoSwipe) doesn't get
+  // re-created when the router hands us a fresh location.state object,
+  // e.g. after popping the page overview's history entry.
+  backgroundLocationRef.current = location.state?.backgroundLocation;
 
   let { id, prevAction, prevId } = useParams();
 
@@ -84,7 +110,7 @@ function Reader(props) {
 
     closeHandledRef.current = true;
     setTimeout(() => {
-      if (location.state?.backgroundLocation) {
+      if (backgroundLocationRef.current) {
         navigate(-1);
       } else if (prevAction !== undefined && prevId !== undefined) {
         if (prevAction === "s") {
@@ -98,7 +124,7 @@ function Reader(props) {
         navigate(`${process.env.PUBLIC_URL}/browse`);
       }
     }, 250);
-  }, [location.state, navigate, prevAction, prevId]);
+  }, [navigate, prevAction, prevId]);
 
   const updateIndex = useCallback(async (pageNum, currentItem) => {
     if (!currentItem) {
@@ -115,38 +141,62 @@ function Reader(props) {
     await db.collection.put(updatedItem, id);
   }, [id]);
 
-  const clampPageNumber = useCallback((pageNumber, pageCount) => {
-    const parsedPage = Number.parseInt(pageNumber, 10);
-    if (!Number.isFinite(parsedPage)) {
-      return 1;
-    }
+  // The page overview gets its own history entry (same URL), so the Android
+  // back button / back gesture closes the overview instead of the reader.
+  const openThumbnails = useCallback(() => {
+    setReaderControlsVisible(true);
+    setReturnPillVisible(false);
+    setThumbnailsMounted(true);
+    setThumbnailsOpen(true);
 
-    return Math.min(Math.max(parsedPage, 1), pageCount || 1);
+    const token = `pages-${Date.now()}`;
+    pagesHistoryTokenRef.current = token;
+    window.history.pushState({ ...window.history.state, loboReaderPages: token }, '');
   }, []);
 
-  const openJumpPanel = useCallback(() => {
-    setJumpStartPage(readerState.page);
-    setJumpValue(String(readerState.page + 1));
-    setReaderControlsVisible(true);
-    setJumpOpen(true);
-  }, [readerState.page]);
+  const closeThumbnails = useCallback(() => {
+    setThumbnailsOpen(false);
 
-  const previewPage = useCallback((pageNumber) => {
-    const pageCount = readerState.pageCount;
-    if (!pageCount) {
-      return;
+    const token = pagesHistoryTokenRef.current;
+    pagesHistoryTokenRef.current = null;
+    if (token && window.history.state?.loboReaderPages === token) {
+      window.history.back();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!thumbnailsOpen) {
+      return undefined;
     }
 
-    const normalizedPage = clampPageNumber(pageNumber, pageCount);
-    const pageIndex = normalizedPage - 1;
-    if (lastPreviewedPageRef.current === pageIndex) {
-      return;
-    }
+    const handlePopState = () => {
+      if (window.history.state?.loboReaderPages !== pagesHistoryTokenRef.current) {
+        pagesHistoryTokenRef.current = null;
+        setThumbnailsOpen(false);
+      }
+    };
 
-    lastPreviewedPageRef.current = pageIndex;
-    pswpRef.current?.goTo(pageIndex);
-    setReaderState((state) => ({ ...state, page: pageIndex }));
-  }, [clampPageNumber, readerState.pageCount]);
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [thumbnailsOpen]);
+
+  const showReturnPill = useCallback(() => {
+    clearTimeout(returnPillTimerRef.current);
+    setReturnPillVisible(true);
+    returnPillTimerRef.current = setTimeout(() => setReturnPillVisible(false), 6000);
+  }, []);
+
+  useEffect(() => () => clearTimeout(returnPillTimerRef.current), []);
+
+  const selectPage = useCallback((pageIndex) => {
+    closeThumbnails();
+
+    if (pageIndex !== readerState.page) {
+      setReturnPage(readerState.page);
+      pswpRef.current?.goTo(pageIndex);
+      showReturnPill();
+    }
+  }, [closeThumbnails, readerState.page, showReturnPill]);
 
   const initPhotoSwipe = useCallback((pages, item) => {
     const startingPage = Math.min(Math.max(Number(item.page) || 0, 0), pages.length - 1);
@@ -157,8 +207,6 @@ function Reader(props) {
     };
 
     setReaderState({ page: startingPage, pageCount: pages.length });
-    setJumpValue(String(startingPage + 1));
-    lastPreviewedPageRef.current = startingPage;
 
     const options = {
       mainClass: 'pswp--styles',
@@ -207,9 +255,7 @@ function Reader(props) {
 
     pswp.on('change', () => {
       currentItem.page = pswp.currIndex;
-      lastPreviewedPageRef.current = pswp.currIndex;
       setReaderState({ page: pswp.currIndex, pageCount: pages.length });
-      setJumpValue(String(pswp.currIndex + 1));
       updateIndex(pswp.currIndex, currentItem);
     });
 
@@ -230,93 +276,70 @@ function Reader(props) {
     window.setTimeout(notifyReaderReady, 1000);
   }, [close, notifyReaderReady, setReaderViewportActive, updateIndex]);
 
-  const renderJumpControls = () => {
+  const renderReaderControls = () => {
     if (!open || readerState.pageCount <= 0) {
       return null;
     }
 
     const pageNumber = readerState.page + 1;
-    const selectedPage = clampPageNumber(jumpValue, readerState.pageCount);
-    const canReturnToStartPage = jumpStartPage !== readerState.page;
-    const controlsClassName = readerControlsVisible || jumpOpen
+    const controlsClassName = readerControlsVisible || thumbnailsOpen
       ? 'readerControls'
       : 'readerControls readerControls--hidden';
 
     const controls = (
-      <div className={controlsClassName}>
-        <button
-          type="button"
-          className="readerCloseButton"
-          aria-label="Close reader"
-          onClick={(event) => {
-            event.stopPropagation();
-            pswpRef.current?.close();
-          }}
-          onPointerDown={(event) => event.stopPropagation()}>
-          ×
-        </button>
-        <button
-          type="button"
-          className="readerPageChip"
-          onClick={(event) => {
-            event.stopPropagation();
-            openJumpPanel();
-          }}
-          onPointerDown={(event) => event.stopPropagation()}>
-          {pageNumber} / {readerState.pageCount}
-        </button>
-        {jumpOpen && (
-          <div
-            className="readerJumpOverlay"
-            onClick={() => setJumpOpen(false)}
-            onPointerDown={(event) => event.stopPropagation()}>
-            <form
-              className="readerJumpPanel"
-              onClick={(event) => event.stopPropagation()}
-              onKeyDown={(event) => event.stopPropagation()}
-              onSubmit={(event) => {
-                event.preventDefault();
-                previewPage(jumpValue);
-              }}>
-              <div className="readerJumpTitle">Jump to page</div>
-              <div className="readerJumpMeta">Selected {selectedPage} / {readerState.pageCount}</div>
-              <div className="readerJumpRange">
-                <Slider
-                  value={[selectedPage]}
-                  min={1}
-                  max={readerState.pageCount}
-                  step={1}
-                  onChange={({ value }) => setJumpValue(String(value[0]))}
-                  onFinalChange={({ value }) => {
-                    setJumpValue(String(value[0]));
-                    previewPage(value[0]);
-                  }}
-                />
-              </div>
-              <div className="readerJumpActions">
-                <Button
-                  disabled={!canReturnToStartPage}
-                  kind={KIND.secondary}
-                  size={BUTTON_SIZE.compact}
-                  type="button"
-                  onClick={() => {
-                    const startPageNumber = jumpStartPage + 1;
-                    setJumpValue(String(startPageNumber));
-                    previewPage(startPageNumber);
-                  }}>
-                  Back to {jumpStartPage + 1}
-                </Button>
-                <Button
-                  size={BUTTON_SIZE.compact}
-                  type="button"
-                  onClick={() => setJumpOpen(false)}>
-                  Close
-                </Button>
-              </div>
-            </form>
+      <ThemeProvider theme={readerTheme}>
+        <div className={controlsClassName}>
+          <div className="readerCloseButton" onClick={stopPropagation} onPointerDown={stopPropagation}>
+            <Button
+              type="button"
+              kind={KIND.secondary}
+              shape={SHAPE.circle}
+              size={SIZE.compact}
+              aria-label="Close reader"
+              onClick={() => pswpRef.current?.close()}>
+              <CloseIcon size={24} />
+            </Button>
           </div>
-        )}
-      </div>
+          <div className="readerPageChip" onClick={stopPropagation} onPointerDown={stopPropagation}>
+            <Button
+              type="button"
+              kind={KIND.secondary}
+              shape={SHAPE.pill}
+              size={SIZE.compact}
+              aria-label={`Page ${pageNumber} of ${readerState.pageCount}. Show pages`}
+              startEnhancer={PagesIcon}
+              onClick={openThumbnails}>
+              {pageNumber} / {readerState.pageCount}
+            </Button>
+          </div>
+          {returnPillVisible && returnPage !== null && returnPage !== readerState.page && (
+            <div className="readerReturnPill" onClick={stopPropagation} onPointerDown={stopPropagation}>
+              <Button
+                type="button"
+                kind={KIND.primary}
+                shape={SHAPE.pill}
+                size={SIZE.compact}
+                aria-label={`Back to page ${returnPage + 1}`}
+                startEnhancer={() => <ArrowLeft size={18} />}
+                onClick={() => selectPage(returnPage)}>
+                {returnPage + 1}
+              </Button>
+            </div>
+          )}
+          {thumbnailsMounted && (
+            <PageThumbnailGrid
+              key={id}
+              open={thumbnailsOpen}
+              identifier={id}
+              pages={pageItems}
+              currentPage={readerState.page}
+              returnPage={returnPage}
+              onSelect={selectPage}
+              onClose={closeThumbnails}
+            />
+          )}
+        </div>
+      </ThemeProvider>
     );
 
     return createPortal(controls, document.body);
@@ -329,6 +352,11 @@ function Reader(props) {
       closeHandledRef.current = false;
       setOpen(false);
       setError(false);
+      setThumbnailsOpen(false);
+      setThumbnailsMounted(false);
+      setPageItems([]);
+      setReturnPage(null);
+      setReturnPillVisible(false);
 
       try {
         const bookMetadata = await InternetArchive.BookManifestAPI.get({ identifier: id });
@@ -370,6 +398,7 @@ function Reader(props) {
           throw new Error('No readable pages found');
         }
 
+        setPageItems(pages);
         setOpen(true);
         initPhotoSwipe(pages, item);
       } catch (err) {
@@ -401,7 +430,7 @@ function Reader(props) {
             null
             :
             (<div>
-              {renderJumpControls()}
+              {renderReaderControls()}
             </div>)
       }
     </div>

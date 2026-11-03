@@ -112,9 +112,75 @@ class SearchAPI {
   }
 }
 
+class MetadataAPI {
+  async get(identifier) {
+    if (!identifier) {
+      throw new Error("Missing required arg 'identifier'");
+    }
+    return fetchJson(`https://archive.org/metadata/${encodeURIComponent(identifier)}`);
+  }
+}
+
+// OCR-derived files that identify the book's text "doc" (BookReader's subPrefix),
+// in order of preference.
+const BOOK_TEXT_SUFFIXES = ['_djvu.xml', '_hocr_searchtext.txt.gz', '_hocr.html', '_chocr.html.gz'];
+
+export const getBookTextSource = (metadata) => {
+  const server = metadata?.server || metadata?.d1;
+  const path = metadata?.dir;
+  const names = (metadata?.files || []).map((file) => file?.name).filter(Boolean);
+
+  if (!server || !path) {
+    return null;
+  }
+
+  for (const suffix of BOOK_TEXT_SUFFIXES) {
+    const name = names.find((candidate) => candidate.endsWith(suffix));
+    if (name) {
+      const doc = name.slice(0, -suffix.length);
+      return {
+        server,
+        path,
+        doc,
+        pageNumbersFile: names.includes(`${doc}_page_numbers.json`) ? `${doc}_page_numbers.json` : null
+      };
+    }
+  }
+
+  return null;
+};
+
+// Full-text search inside a single item, the same endpoint archive.org's own
+// BookReader uses. Not formally documented, but CORS-enabled and long-lived.
+class FullTextAPI {
+  async source(identifier) {
+    const metadata = await InternetArchive.MetadataAPI.get(identifier);
+    return getBookTextSource(metadata);
+  }
+  async search({ identifier, source, q }) {
+    if (!source || !q) {
+      throw new Error("Missing required args 'source' and 'q'");
+    }
+    const params = paramify({ item_id: identifier, doc: source.doc, path: source.path, q });
+    const json = await fetchJson(`https://${source.server}/fulltext/inside.php?${params}`);
+    if (json?.error) {
+      throw new Error(json.error);
+    }
+    return json;
+  }
+  async pageNumbers({ identifier, source }) {
+    if (!source?.pageNumbersFile) {
+      return null;
+    }
+    return fetchJson(`https://archive.org/download/${encodeURIComponent(identifier)}/${encodeURIComponent(source.pageNumbersFile)}`);
+  }
+}
+
 const InternetArchive = {
   SearchAPI: new SearchAPI(),
-  BookManifestAPI: new BookManifestAPI()
+  BookManifestAPI: new BookManifestAPI(),
+  MetadataAPI: new MetadataAPI(),
+  FullTextAPI: new FullTextAPI()
 };
 
 export default InternetArchive;
