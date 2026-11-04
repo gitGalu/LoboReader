@@ -17,6 +17,12 @@ import { isMobile, isIPad13, isTablet } from 'react-device-detect';
 const BROWSER_PAGE_SIZE = 24;
 const AUTO_PAGING_IMAGE_THRESHOLD = 4;
 
+// Search text goes into the query as a quoted phrase. The Internet Archive
+// rejects a phrase containing any of these, escaped or not, with a backend
+// error; they split words in its index anyway, so a space matches the same
+// titles ("C&VG" still finds "Computer & Video Games").
+const toSearchPhrase = (text) => text.replace(/["\\/&%|]/g, ' ').replace(/\s+/g, ' ').trim();
+
 const Browser = (props) => {
   const [browserItems, setBrowserItems] = useState([]);
   const [initial, setInitial] = useState(true);
@@ -33,6 +39,12 @@ const Browser = (props) => {
   const [pending, setPending] = useState(false);
   const pageRef = React.useRef(1);
   const pendingRef = React.useRef(false);
+  // Bumped by every request; a response whose number is no longer current
+  // belongs to a query the user has since moved away from and is dropped.
+  const requestIdRef = React.useRef(0);
+  // Bumped on every route change so the list reloads even when the route
+  // resolves to the same parent (e.g. "/" -> "/browse", both the Magazine Rack).
+  const [routeLoadToken, setRouteLoadToken] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
   const [viewportWidth, setViewportWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
   const masonryContainerRef = React.useRef(null);
@@ -85,7 +97,7 @@ const Browser = (props) => {
       if (searchMode === "2") {
         q += 'title:';
       }
-      q += `("${parentIdentifier}")`;
+      q += `("${toSearchPhrase(parentIdentifier)}")`;
       if (searchScope === "1") {
         q += ' AND collection:("magazine_rack")';
         q += ' AND mediatype:(collection OR texts)';
@@ -102,9 +114,14 @@ const Browser = (props) => {
     const query = prepareQuery();
     const targetPage = pageToFetch ?? pageRef.current;
 
-    if (!query || pendingRef.current) {
+    // Another page of the same list can wait for the one in flight; a fresh
+    // query (new search, series, mode) replaces whatever is in flight.
+    if (!query || (pendingRef.current && !replace)) {
       return;
     }
+
+    const requestId = ++requestIdRef.current;
+    const isCurrent = () => requestId === requestIdRef.current;
 
     pendingRef.current = true;
     setPending(true);
@@ -124,6 +141,10 @@ const Browser = (props) => {
         sort: ['mediatype asc', 'identifier asc']
       });
 
+      if (!isCurrent()) {
+        return;
+      }
+
       const docs = [...results.response.docs].sort((a, b) => {
         const mediaTypeCompare = (a.mediatype || '').localeCompare(b.mediatype || '');
         if (mediaTypeCompare !== 0) {
@@ -139,6 +160,9 @@ const Browser = (props) => {
       pageRef.current = targetPage + 1;
       setError(false);
     } catch (err) {
+      if (!isCurrent()) {
+        return;
+      }
       if (replace && browserItemsRef.current.length === 0) {
         setBrowserItems([]);
         setTotalItems(0);
@@ -146,10 +170,14 @@ const Browser = (props) => {
       setInitial(false);
       setError(true);
     } finally {
-      pendingRef.current = false;
-      setPending(false);
-      if (replace) {
-        setRefreshing(false);
+      // A superseded request leaves the loading state to the one that
+      // replaced it.
+      if (isCurrent()) {
+        pendingRef.current = false;
+        setPending(false);
+        if (replace) {
+          setRefreshing(false);
+        }
       }
     }
   }, [prepareQuery]);
@@ -173,6 +201,7 @@ const Browser = (props) => {
       setIsSearch(false);
       setParentIdentifier((id && id !== "s") ? id : "magazine_rack");
     }
+    setRouteLoadToken((token) => token + 1);
   }, [id, location.pathname, searchQuery]);
 
   useEffect(() => {
@@ -186,7 +215,7 @@ const Browser = (props) => {
     pageRef.current = 1;
     setError(false);
     fetchData({ pageToFetch: 1, replace: true });
-  }, [fetchData, parentIdentifier]);
+  }, [fetchData, parentIdentifier, routeLoadToken]);
 
   useEffect(() => {
     return () => {
@@ -373,20 +402,21 @@ const Browser = (props) => {
     const normalizedInput = input.trim();
     document.getElementById('search')?.blur();
 
-    if (!normalizedInput) {
+    if (!toSearchPhrase(normalizedInput)) {
       navigate(`${process.env.PUBLIC_URL}/browse`);
       return;
     }
 
-    navigate(`${process.env.PUBLIC_URL}/browse/s/${normalizedInput}/`);
+    // Encoded, or "/", "?", "#" and "%" in the text would be read as URL syntax.
+    navigate(`${process.env.PUBLIC_URL}/browse/s/${encodeURIComponent(normalizedInput)}/`);
   }
 
   const getLink = (identifier) => {
     if (isSearch) {
-      return `${process.env.PUBLIC_URL}/read/${identifier}/p/s/${parentIdentifier}`;
+      return `${process.env.PUBLIC_URL}/read/${encodeURIComponent(identifier)}/p/s/${encodeURIComponent(parentIdentifier)}`;
     }
 
-    return `${process.env.PUBLIC_URL}/read/${identifier}/p/b/${parentIdentifier}`;
+    return `${process.env.PUBLIC_URL}/read/${encodeURIComponent(identifier)}/p/b/${encodeURIComponent(parentIdentifier)}`;
   }
 
   const fillSearchBox = () => {
@@ -564,8 +594,19 @@ const Browser = (props) => {
               </Block>
             )}>
             <div style={{ marginLeft: '8px' }}>
+              {/* As tall as the search field next to it (the row stretches
+                  this wrapper to the field's height), not padding + icon. */}
               <Button
-                kind={KIND.secondary}>
+                kind={KIND.secondary}
+                overrides={{
+                  BaseButton: {
+                    style: {
+                      height: '100%',
+                      paddingTop: '0',
+                      paddingBottom: '0'
+                    }
+                  }
+                }}>
                 <TriangleDown size={24} />
               </Button>
             </div>

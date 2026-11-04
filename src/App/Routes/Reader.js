@@ -115,9 +115,10 @@ function Reader(props) {
         navigate(-1);
       } else if (prevAction !== undefined && prevId !== undefined) {
         if (prevAction === "s") {
-          navigate(`${process.env.PUBLIC_URL}/browse/s/${prevId}`);
+          // useParams hands the search text back decoded: encode it again.
+          navigate(`${process.env.PUBLIC_URL}/browse/s/${encodeURIComponent(prevId)}`);
         } else {
-          navigate(`${process.env.PUBLIC_URL}/browse/${prevId}`);
+          navigate(`${process.env.PUBLIC_URL}/browse/${encodeURIComponent(prevId)}`);
         }
       } else if (prevAction === "c") {
         navigate(`${process.env.PUBLIC_URL}/collection`);
