@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkLoboReader=self.webpackChunkLoboReader||[]).push([[379],{2379:(e,r,a)=>{a.r(r),a.d(r,{passPixelShader:()=>t});var s=a(4453);const o="passPixelShader",n="varying vec2 vUV;uniform sampler2D textureSampler;\n#define CUSTOM_FRAGMENT_DEFINITIONS\nvoid main(void) \n{gl_FragColor=texture2D(textureSampler,vUV);}";s.l.ShadersStore[o]||(s.l.ShadersStore[o]=n);const t={name:o,shader:n}}}]);
+//# sourceMappingURL=379.d40c7ed1.chunk.js.map
