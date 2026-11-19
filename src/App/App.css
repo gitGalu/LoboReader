@@ -716,6 +716,45 @@ ul {
   z-index: 100100;
 }
 
+/* Only rendered on headset browsers (see XR/xrSupport.js); mirrors the close
+ * button on the opposite corner. */
+.readerXrButton {
+  left: 14px;
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 14px);
+  z-index: 100100;
+}
+
+/* While XR is live only the Exit VR button stays on the page. */
+body.readerXrActive .pswp,
+body.readerXrActive .readerControls > :not(.readerXrButton) {
+  visibility: hidden;
+}
+
+/* The 2D tap that would bring hidden controls back is covered, so keep Exit VR. */
+body.readerXrActive .readerControls--hidden {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.readerXrError {
+  animation: readerFadeUp 0.2s ease-out;
+  background: #000000;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 2.5px;
+  color: #f2f2f2;
+  font-size: 12px;
+  left: 50%;
+  line-height: 1.4;
+  max-width: 280px;
+  padding: 10px 14px;
+  position: fixed;
+  text-align: center;
+  top: calc(env(safe-area-inset-top, 0px) + 64px);
+  transform: translateX(-50%);
+  z-index: 100100;
+}
+
 /*
  * Page overview ("Pages") and in-issue search, drawn over the reader.
  * Same print vocabulary as the covers on the main screen: 2.5px corners,
